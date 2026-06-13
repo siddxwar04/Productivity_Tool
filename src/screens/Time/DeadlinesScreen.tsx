@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,9 +21,13 @@ export function DeadlinesScreen({ navigation }: Props) {
   const deleteDeadline = useDeadlinesStore((s) => s.deleteDeadline);
   const [filter, setFilter] = useState<'all' | 'active' | 'done'>('active');
 
-  const filtered = deadlines
-    .filter((d) => filter === 'all' || (filter === 'active' ? !d.completed : d.completed))
-    .sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime());
+  const filtered = useMemo(
+    () =>
+      deadlines
+        .filter((d) => filter === 'all' || (filter === 'active' ? !d.completed : d.completed))
+        .sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime()),
+    [deadlines, filter],
+  );
 
   return (
     <ScreenWrapper>

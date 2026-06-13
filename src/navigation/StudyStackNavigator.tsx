@@ -1,25 +1,75 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StudyHubScreen } from '../screens/Study/StudyHubScreen';
-import { PomodoroScreen } from '../screens/Time/PomodoroScreen';
-import { PlannerScreen } from '../screens/Time/PlannerScreen';
-import { DeadlinesScreen } from '../screens/Time/DeadlinesScreen';
-import { AddTaskScreen } from '../screens/Time/AddTaskScreen';
-import { NotesListScreen } from '../screens/Academics/NotesListScreen';
-import { NoteEditorScreen } from '../screens/Academics/NoteEditorScreen';
-import { FlashcardsScreen } from '../screens/Academics/FlashcardsScreen';
-import { DeckDetailScreen } from '../screens/Academics/DeckDetailScreen';
-import { ReviewScreen } from '../screens/Academics/ReviewScreen';
-import { GradesScreen } from '../screens/Academics/GradesScreen';
-import { ResourcesScreen } from '../screens/Academics/ResourcesScreen';
-import { SmartScheduleScreen } from '../screens/Study/SmartScheduleScreen';
-import { StudyBuddyScreen } from '../screens/Study/StudyBuddyScreen';
-import { ArticlesScreen } from '../screens/Academics/ArticlesScreen';
-import { ArticleViewerScreen } from '../screens/Academics/ArticleViewerScreen';
-import { ResourceViewerScreen } from '../screens/Academics/ResourceViewerScreen';
+import { lazyNamedScreen } from './lazyScreen';
 import { StudyStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<StudyStackParamList>();
+
+const PomodoroScreen = lazyNamedScreen(
+  () => require('../screens/Time/PomodoroScreen'),
+  'PomodoroScreen',
+);
+const PlannerScreen = lazyNamedScreen(
+  () => require('../screens/Time/PlannerScreen'),
+  'PlannerScreen',
+);
+const DeadlinesScreen = lazyNamedScreen(
+  () => require('../screens/Time/DeadlinesScreen'),
+  'DeadlinesScreen',
+);
+const AddTaskScreen = lazyNamedScreen(
+  () => require('../screens/Time/AddTaskScreen'),
+  'AddTaskScreen',
+);
+const NotesListScreen = lazyNamedScreen(
+  () => require('../screens/Academics/NotesListScreen'),
+  'NotesListScreen',
+);
+const NoteEditorScreen = lazyNamedScreen(
+  () => require('../screens/Academics/NoteEditorScreen'),
+  'NoteEditorScreen',
+);
+const FlashcardsScreen = lazyNamedScreen(
+  () => require('../screens/Academics/FlashcardsScreen'),
+  'FlashcardsScreen',
+);
+const DeckDetailScreen = lazyNamedScreen(
+  () => require('../screens/Academics/DeckDetailScreen'),
+  'DeckDetailScreen',
+);
+const ReviewScreen = lazyNamedScreen(
+  () => require('../screens/Academics/ReviewScreen'),
+  'ReviewScreen',
+);
+const GradesScreen = lazyNamedScreen(
+  () => require('../screens/Academics/GradesScreen'),
+  'GradesScreen',
+);
+const ResourcesScreen = lazyNamedScreen(
+  () => require('../screens/Academics/ResourcesScreen'),
+  'ResourcesScreen',
+);
+const SmartScheduleScreen = lazyNamedScreen(
+  () => require('../screens/Study/SmartScheduleScreen'),
+  'SmartScheduleScreen',
+);
+const StudyBuddyScreen = lazyNamedScreen(
+  () => require('../screens/Study/StudyBuddyScreen'),
+  'StudyBuddyScreen',
+);
+const ArticlesScreen = lazyNamedScreen(
+  () => require('../screens/Academics/ArticlesScreen'),
+  'ArticlesScreen',
+);
+const ArticleViewerScreen = lazyNamedScreen(
+  () => require('../screens/Academics/ArticleViewerScreen'),
+  'ArticleViewerScreen',
+);
+const ResourceViewerScreen = lazyNamedScreen(
+  () => require('../screens/Academics/ResourceViewerScreen'),
+  'ResourceViewerScreen',
+);
 
 export function StudyStackNavigator() {
   return (

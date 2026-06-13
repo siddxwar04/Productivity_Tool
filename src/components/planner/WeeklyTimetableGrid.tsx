@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { PlannerBlock } from '../../types';
 import { useTheme } from '../../theme/ThemeContext';
@@ -28,6 +28,29 @@ export function WeeklyTimetableGrid({ blocks, onBlockPress, onBlockMove }: Weekl
   const columnWidth = 92;
   const gridHeight = HOURS.length * PLANNER_ROW_HEIGHT;
 
+  const blocksByDay = useMemo(() => {
+    const map = new Map<number, PlannerBlock[]>();
+    for (const block of blocks) {
+      const dayBlocks = map.get(block.dayOfWeek);
+      if (dayBlocks) {
+        dayBlocks.push(block);
+      } else {
+        map.set(block.dayOfWeek, [block]);
+      }
+    }
+    return map;
+  }, [blocks]);
+
+  const conflictIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const block of blocks) {
+      if (findConflicts(blocks, block).length > 0) {
+        ids.add(block.id);
+      }
+    }
+    return ids;
+  }, [blocks]);
+
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
       <View>
@@ -56,7 +79,7 @@ export function WeeklyTimetableGrid({ blocks, onBlockPress, onBlockMove }: Weekl
 
           <View style={styles.dayColumns}>
             {PLANNER_DAY_INDICES.map((dayOfWeek, dayIndex) => {
-              const dayBlocks = blocks.filter((b) => b.dayOfWeek === dayOfWeek);
+              const dayBlocks = blocksByDay.get(dayOfWeek) ?? [];
               return (
                 <View
                   key={dayOfWeek}
@@ -84,7 +107,7 @@ export function WeeklyTimetableGrid({ blocks, onBlockPress, onBlockMove }: Weekl
                       dayColumnWidth={columnWidth}
                       dayIndex={dayIndex}
                       dayIndices={PLANNER_DAY_INDICES}
-                      hasConflict={findConflicts(blocks, block).length > 0}
+                      hasConflict={conflictIds.has(block.id)}
                       onPress={() => onBlockPress(block)}
                       onDragEnd={(day, hour, minute) => onBlockMove(block.id, day, hour, minute)}
                     />

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { memo, useRef } from 'react';
 import {
   Animated,
   PanResponder,
@@ -28,7 +28,7 @@ interface DraggableStudyBlockProps {
   dayIndices: readonly number[];
 }
 
-export function DraggableStudyBlock({
+export const DraggableStudyBlock = memo(function DraggableStudyBlock({
   block,
   hasConflict,
   onPress,
@@ -111,7 +111,7 @@ export function DraggableStudyBlock({
       </Pressable>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   wrapper: {

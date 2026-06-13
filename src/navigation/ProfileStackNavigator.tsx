@@ -1,11 +1,19 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ProfileScreen } from '../screens/Profile/ProfileScreen';
-import { NotificationsScreen } from '../screens/Profile/NotificationsScreen';
-import { SettingsScreen } from '../screens/Profile/SettingsScreen';
+import { lazyNamedScreen } from './lazyScreen';
 import { ProfileStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
+
+const NotificationsScreen = lazyNamedScreen(
+  () => require('../screens/Profile/NotificationsScreen'),
+  'NotificationsScreen',
+);
+const SettingsScreen = lazyNamedScreen(
+  () => require('../screens/Profile/SettingsScreen'),
+  'SettingsScreen',
+);
 
 export function ProfileStackNavigator() {
   return (

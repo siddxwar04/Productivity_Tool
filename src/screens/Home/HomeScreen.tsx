@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useNavigation, CompositeNavigationProp } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -29,14 +29,18 @@ export function HomeScreen() {
   const displayName = useUserProfileStore((s) => s.displayName);
   const studyGoalHours = useUserProfileStore((s) => s.goals.studyHoursPerDay);
   const habits = useHabitsStore((s) => s.habits);
+  const deadlines = useDeadlinesStore((s) => s.deadlines);
   const getUpcoming = useDeadlinesStore((s) => s.getUpcoming);
+  const upcoming = useMemo(() => getUpcoming(3), [deadlines, getUpcoming]);
   const streak = useStreakStore((s) => s.current);
   const todayStudyMinutes = useAnalyticsStore((s) => s.todayStudyMinutes);
 
-  const upcoming = getUpcoming(3);
   const nextDeadline = upcoming[0];
   const goalMinutes = studyGoalHours * 60;
-  const studyProgress = Math.min(todayStudyMinutes / goalMinutes, 1);
+  const studyProgress = useMemo(
+    () => Math.min(todayStudyMinutes / goalMinutes, 1),
+    [todayStudyMinutes, goalMinutes],
+  );
 
   return (
     <ScreenWrapper>

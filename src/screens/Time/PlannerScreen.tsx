@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTheme } from '../../theme/ThemeContext';
@@ -136,13 +136,13 @@ export function PlannerScreen({ navigation }: Props) {
         <PlannerAnalyticsPanel analytics={analytics} />
 
         <View style={[styles.toggleRow, { backgroundColor: colors.surfaceSecondary }]}>
-          <ToggleButton
+          <MemoToggleButton
             label="Week grid"
             active={viewMode === 'week'}
             onPress={() => setViewMode('week')}
             colors={colors}
           />
-          <ToggleButton
+          <MemoToggleButton
             label="Day timeline"
             active={viewMode === 'day'}
             onPress={() => setViewMode('day')}
@@ -236,6 +236,8 @@ function ToggleButton({
     </TouchableOpacity>
   );
 }
+
+const MemoToggleButton = memo(ToggleButton);
 
 const styles = StyleSheet.create({
   content: { paddingBottom: 32 },

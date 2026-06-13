@@ -15,7 +15,16 @@ type Props = {
 
 export function NotificationsScreen({ navigation }: Props) {
   const { colors } = useTheme();
-  const settings = useNotificationSettingsStore();
+  const deadlineReminders = useNotificationSettingsStore((s) => s.deadlineReminders);
+  const habitDailyReminder = useNotificationSettingsStore((s) => s.habitDailyReminder);
+  const moodCheckIn = useNotificationSettingsStore((s) => s.moodCheckIn);
+  const sleepLogReminder = useNotificationSettingsStore((s) => s.sleepLogReminder);
+  const flashcardReview = useNotificationSettingsStore((s) => s.flashcardReview);
+  const pomodoroChime = useNotificationSettingsStore((s) => s.pomodoroChime);
+  const breakReminders = useNotificationSettingsStore((s) => s.breakReminders);
+  const groupChat = useNotificationSettingsStore((s) => s.groupChat);
+  const accountabilityPartner = useNotificationSettingsStore((s) => s.accountabilityPartner);
+  const milestoneUnlocked = useNotificationSettingsStore((s) => s.milestoneUnlocked);
   const updateDeadlineReminders = useNotificationSettingsStore((s) => s.updateDeadlineReminders);
   const updateTimedReminder = useNotificationSettingsStore((s) => s.updateTimedReminder);
   const updateSettings = useNotificationSettingsStore((s) => s.updateSettings);
@@ -30,17 +39,17 @@ export function NotificationsScreen({ navigation }: Props) {
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Deadline reminders</Text>
         <ToggleRow
           label="1 week before"
-          value={settings.deadlineReminders.oneWeek}
+          value={deadlineReminders.oneWeek}
           onValueChange={(oneWeek) => updateDeadlineReminders({ oneWeek })}
         />
         <ToggleRow
           label="1 day before"
-          value={settings.deadlineReminders.oneDay}
+          value={deadlineReminders.oneDay}
           onValueChange={(oneDay) => updateDeadlineReminders({ oneDay })}
         />
         <ToggleRow
           label="1 hour before"
-          value={settings.deadlineReminders.oneHour}
+          value={deadlineReminders.oneHour}
           onValueChange={(oneHour) => updateDeadlineReminders({ oneHour })}
         />
       </Card>
@@ -49,68 +58,68 @@ export function NotificationsScreen({ navigation }: Props) {
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Daily reminders</Text>
         <ToggleRow
           label="Habit daily reminder"
-          value={settings.habitDailyReminder.enabled}
+          value={habitDailyReminder.enabled}
           onValueChange={(enabled) =>
-            updateTimedReminder('habitDailyReminder', { ...settings.habitDailyReminder, enabled })
+            updateTimedReminder('habitDailyReminder', { ...habitDailyReminder, enabled })
           }
         />
-        {settings.habitDailyReminder.enabled && (
+        {habitDailyReminder.enabled && (
           <TimePickerRow
             label="Reminder time"
-            time={settings.habitDailyReminder.time}
+            time={habitDailyReminder.time}
             onTimeChange={(time) =>
-              updateTimedReminder('habitDailyReminder', { ...settings.habitDailyReminder, time })
+              updateTimedReminder('habitDailyReminder', { ...habitDailyReminder, time })
             }
           />
         )}
 
         <ToggleRow
           label="Mood check-in (evening)"
-          value={settings.moodCheckIn.enabled}
+          value={moodCheckIn.enabled}
           onValueChange={(enabled) =>
-            updateTimedReminder('moodCheckIn', { ...settings.moodCheckIn, enabled })
+            updateTimedReminder('moodCheckIn', { ...moodCheckIn, enabled })
           }
         />
-        {settings.moodCheckIn.enabled && (
+        {moodCheckIn.enabled && (
           <TimePickerRow
             label="Reminder time"
-            time={settings.moodCheckIn.time}
+            time={moodCheckIn.time}
             onTimeChange={(time) =>
-              updateTimedReminder('moodCheckIn', { ...settings.moodCheckIn, time })
+              updateTimedReminder('moodCheckIn', { ...moodCheckIn, time })
             }
           />
         )}
 
         <ToggleRow
           label="Sleep log (morning)"
-          value={settings.sleepLogReminder.enabled}
+          value={sleepLogReminder.enabled}
           onValueChange={(enabled) =>
-            updateTimedReminder('sleepLogReminder', { ...settings.sleepLogReminder, enabled })
+            updateTimedReminder('sleepLogReminder', { ...sleepLogReminder, enabled })
           }
         />
-        {settings.sleepLogReminder.enabled && (
+        {sleepLogReminder.enabled && (
           <TimePickerRow
             label="Reminder time"
-            time={settings.sleepLogReminder.time}
+            time={sleepLogReminder.time}
             onTimeChange={(time) =>
-              updateTimedReminder('sleepLogReminder', { ...settings.sleepLogReminder, time })
+              updateTimedReminder('sleepLogReminder', { ...sleepLogReminder, time })
             }
           />
         )}
 
         <ToggleRow
           label="Flashcard review"
-          value={settings.flashcardReview.enabled}
+          value={flashcardReview.enabled}
           onValueChange={(enabled) =>
-            updateTimedReminder('flashcardReview', { ...settings.flashcardReview, enabled })
+            updateTimedReminder('flashcardReview', { ...flashcardReview, enabled })
           }
         />
-        {settings.flashcardReview.enabled && (
+        {flashcardReview.enabled && (
           <TimePickerRow
             label="Reminder time"
-            time={settings.flashcardReview.time}
+            time={flashcardReview.time}
             onTimeChange={(time) =>
-              updateTimedReminder('flashcardReview', { ...settings.flashcardReview, time })
+              updateTimedReminder('flashcardReview', { ...flashcardReview, time })
             }
           />
         )}
@@ -120,13 +129,13 @@ export function NotificationsScreen({ navigation }: Props) {
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Study sessions</Text>
         <ToggleRow
           label="Pomodoro session end chime"
-          value={settings.pomodoroChime}
-          onValueChange={(pomodoroChime) => updateSettings({ pomodoroChime })}
+          value={pomodoroChime}
+          onValueChange={(next) => updateSettings({ pomodoroChime: next })}
         />
         <ToggleRow
           label="Break reminders"
-          value={settings.breakReminders}
-          onValueChange={(breakReminders) => updateSettings({ breakReminders })}
+          value={breakReminders}
+          onValueChange={(next) => updateSettings({ breakReminders: next })}
         />
       </Card>
 
@@ -134,19 +143,19 @@ export function NotificationsScreen({ navigation }: Props) {
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Social & rewards</Text>
         <ToggleRow
           label="Group chat messages"
-          value={settings.groupChat}
-          onValueChange={(groupChat) => updateSettings({ groupChat })}
+          value={groupChat}
+          onValueChange={(next) => updateSettings({ groupChat: next })}
         />
         <ToggleRow
           label="Accountability partner check-in"
-          value={settings.accountabilityPartner}
-          onValueChange={(accountabilityPartner) => updateSettings({ accountabilityPartner })}
+          value={accountabilityPartner}
+          onValueChange={(next) => updateSettings({ accountabilityPartner: next })}
         />
         <ToggleRow
           label="Milestone unlocked"
           description="Celebrate when you unlock achievements"
-          value={settings.milestoneUnlocked}
-          onValueChange={(milestoneUnlocked) => updateSettings({ milestoneUnlocked })}
+          value={milestoneUnlocked}
+          onValueChange={(next) => updateSettings({ milestoneUnlocked: next })}
         />
       </Card>
     </ScreenWrapper>

@@ -1,13 +1,27 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GoalsHubScreen } from '../screens/Goals/GoalsHubScreen';
-import { HabitsScreen } from '../screens/Goals/HabitsScreen';
-import { StreaksScreen } from '../screens/Goals/StreaksScreen';
-import { MilestonesScreen } from '../screens/Goals/MilestonesScreen';
-import { AnalyticsScreen } from '../screens/Goals/AnalyticsScreen';
+import { lazyNamedScreen } from './lazyScreen';
 import { GoalsStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<GoalsStackParamList>();
+
+const HabitsScreen = lazyNamedScreen(
+  () => require('../screens/Goals/HabitsScreen'),
+  'HabitsScreen',
+);
+const StreaksScreen = lazyNamedScreen(
+  () => require('../screens/Goals/StreaksScreen'),
+  'StreaksScreen',
+);
+const MilestonesScreen = lazyNamedScreen(
+  () => require('../screens/Goals/MilestonesScreen'),
+  'MilestonesScreen',
+);
+const AnalyticsScreen = lazyNamedScreen(
+  () => require('../screens/Goals/AnalyticsScreen'),
+  'AnalyticsScreen',
+);
 
 export function GoalsStackNavigator() {
   return (

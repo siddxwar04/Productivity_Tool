@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { memo, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme/ThemeContext';
@@ -14,7 +14,7 @@ interface DeckCardProps {
   onPress: () => void;
 }
 
-export function DeckCard({ name, color, categoryIcon, stats, onPress }: DeckCardProps) {
+export const DeckCard = memo(function DeckCard({ name, color, categoryIcon, stats, onPress }: DeckCardProps) {
   const { colors } = useTheme();
   const scale = useRef(new Animated.Value(1)).current;
 
@@ -57,7 +57,7 @@ export function DeckCard({ name, color, categoryIcon, stats, onPress }: DeckCard
       </Animated.View>
     </Pressable>
   );
-}
+});
 
 function StatPill({
   label,

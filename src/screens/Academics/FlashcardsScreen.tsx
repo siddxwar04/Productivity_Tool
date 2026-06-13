@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTheme } from '../../theme/ThemeContext';
@@ -19,11 +19,22 @@ const DECK_ICONS = ['📚', '🧬', '🗣️', '🧮', '⚗️', '🌍', '💻',
 export function FlashcardsScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const decks = useFlashcardsStore((s) => s.decks);
+  const cards = useFlashcardsStore((s) => s.cards);
   const gamification = useFlashcardsStore((s) => s.gamification);
   const getDeckStats = useFlashcardsStore((s) => s.getDeckStats);
   const addDeck = useFlashcardsStore((s) => s.addDeck);
   const [name, setName] = useState('');
   const [showAdd, setShowAdd] = useState(false);
+
+  const deckStatsById = useMemo(
+    () => new Map(decks.map((deck) => [deck.id, getDeckStats(deck.id)])),
+    [decks, cards, getDeckStats],
+  );
+
+  const lifetimeAccuracy = useMemo(
+    () => computeLifetimeAccuracy(gamification),
+    [gamification],
+  );
 
   const create = () => {
     if (!name.trim()) return;
@@ -36,8 +47,6 @@ export function FlashcardsScreen({ navigation }: Props) {
     setShowAdd(false);
     navigation.navigate('DeckDetail', { deckId: id });
   };
-
-  const lifetimeAccuracy = computeLifetimeAccuracy(gamification);
 
   return (
     <ScreenWrapper>
@@ -57,7 +66,7 @@ export function FlashcardsScreen({ navigation }: Props) {
           name={deck.name}
           color={deck.color}
           categoryIcon={deck.categoryIcon ?? '📚'}
-          stats={getDeckStats(deck.id)}
+          stats={deckStatsById.get(deck.id)!}
           onPress={() => navigation.navigate('DeckDetail', { deckId: deck.id })}
         />
       ))}

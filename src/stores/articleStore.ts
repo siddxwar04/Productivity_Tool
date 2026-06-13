@@ -7,6 +7,7 @@ import { mergeArticles } from '../services/articleMergeService';
 import { fetchAllArticles } from '../services/rssService';
 
 const CACHE_DURATION_MS = 30 * 60 * 1000;
+const MIN_REFRESH_GAP_MS = 5000;
 
 interface ArticleState {
   articles: Article[];
@@ -24,6 +25,8 @@ function resolveArticles(remote: Article[]): Article[] {
   return mergeArticles(remote, FALLBACK_ARTICLES_AS_ARTICLES);
 }
 
+let inFlightFetch: Promise<void> | null = null;
+
 export const useArticleStore = create<ArticleState>()(
   persist(
     (set, get) => ({
@@ -36,37 +39,55 @@ export const useArticleStore = create<ArticleState>()(
       fetchArticles: async () => {
         const { lastFetched, isLoading, articles } = get();
         const now = Date.now();
-        if (isLoading) return;
+
+        if (isLoading && inFlightFetch) {
+          return inFlightFetch;
+        }
+
         if (lastFetched && now - lastFetched < CACHE_DURATION_MS) {
-          const normalized = resolveArticles(articles);
-          set({ articles: normalized });
           return;
         }
 
-        set({ isLoading: true, error: null });
-        try {
-          const remote = await fetchAllArticles();
-          const articles = resolveArticles(remote);
-          set({
-            articles,
-            isLoading: false,
-            lastFetched: Date.now(),
-            error: null,
-          });
-        } catch (e) {
-          const articles = resolveArticles([]);
-          set({
-            articles,
-            isLoading: false,
-            error:
-              articles.length === 0
-                ? (e instanceof Error ? e.message : 'Failed to fetch')
-                : null,
-          });
+        if (inFlightFetch) {
+          return inFlightFetch;
         }
+
+        set({ isLoading: true, error: null });
+
+        inFlightFetch = (async () => {
+          try {
+            const remote = await fetchAllArticles();
+            const merged = resolveArticles(remote);
+            set({
+              articles: merged,
+              isLoading: false,
+              lastFetched: Date.now(),
+              error: null,
+            });
+          } catch (e) {
+            const merged = resolveArticles([]);
+            set({
+              articles: merged.length > 0 ? merged : articles,
+              isLoading: false,
+              error:
+                merged.length === 0
+                  ? (e instanceof Error ? e.message : 'Failed to fetch')
+                  : null,
+            });
+          } finally {
+            inFlightFetch = null;
+          }
+        })();
+
+        return inFlightFetch;
       },
 
       refreshArticles: async () => {
+        const { lastFetched } = get();
+        const now = Date.now();
+        if (lastFetched && now - lastFetched < MIN_REFRESH_GAP_MS) {
+          return;
+        }
         set({ lastFetched: null });
         await get().fetchArticles();
       },

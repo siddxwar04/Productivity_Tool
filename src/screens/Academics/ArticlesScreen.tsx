@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, memo } from 'react';
 import {
-  View, Text, TouchableOpacity, ScrollView,
+  View, Text, TouchableOpacity, FlatList, ScrollView,
   ActivityIndicator, RefreshControl, StyleSheet, Animated, Alert, Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -25,7 +25,7 @@ const CATEGORY_CONFIG: Record<ArticleCategory, { emoji: string; color: string; l
   notetaking:     { emoji: '📝', color: '#1a2020', labelColor: '#34d399', label: 'Note taking' },
 };
 
-const CategoryCard = ({ cat, isActive, onPress }: { cat: ArticleCategory; isActive: boolean; onPress: () => void }) => {
+const CategoryCard = memo(({ cat, isActive, onPress }: { cat: ArticleCategory; isActive: boolean; onPress: () => void }) => {
   const config = CATEGORY_CONFIG[cat];
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -67,7 +67,9 @@ const CategoryCard = ({ cat, isActive, onPress }: { cat: ArticleCategory; isActi
       </Text>
     </TouchableOpacity>
   );
-};
+});
+
+CategoryCard.displayName = 'CategoryCard';
 
 export function ArticlesScreen({ navigation }: Props) {
   const { colors } = useTheme();
@@ -116,23 +118,26 @@ export function ArticlesScreen({ navigation }: Props) {
     setCategory(cat);
   }, [setCategory]);
 
+  const renderItem = useCallback(
+    ({ item }: { item: Article }) => (
+      <View style={styles.listItem}>
+        <ArticleCard article={item} onPress={openArticle} />
+      </View>
+    ),
+    [openArticle],
+  );
+
+  const keyExtractor = useCallback(
+    (item: Article) => `${item.id}-${getArticleKey(item)}`,
+    [],
+  );
+
   const showLoading = isLoading && filteredArticles.length === 0;
   const showError = error && filteredArticles.length === 0;
 
-  return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={handleRefresh}
-            tintColor={colors.primary}
-          />
-        }
-      >
+  const listHeader = useMemo(
+    () => (
+      <>
         <View style={styles.headerWrap}>
           <ScreenHeader title="Articles" onBack={() => navigation.goBack()} />
         </View>
@@ -168,32 +173,61 @@ export function ArticlesScreen({ navigation }: Props) {
               <Text style={[styles.retryText, { color: colors.surface }]}>Retry</Text>
             </TouchableOpacity>
           </View>
-        ) : filteredArticles.length === 0 ? (
-          <Text style={[styles.empty, { color: colors.textSecondary }]}>
-            No articles in this category. Pull to refresh.
-          </Text>
-        ) : (
-          <View style={styles.list}>
-            {filteredArticles.map((item) => (
-              <ArticleCard
-                key={`${item.id}-${getArticleKey(item)}`}
-                article={item}
-                onPress={openArticle}
-              />
-            ))}
-          </View>
-        )}
-      </ScrollView>
+        ) : null}
+      </>
+    ),
+    [
+      navigation,
+      selectedCategory,
+      handleCategoryPress,
+      showLoading,
+      showError,
+      colors,
+      error,
+      handleRefresh,
+    ],
+  );
+
+  const listEmpty = useMemo(() => {
+    if (showLoading || showError) return null;
+    return (
+      <Text style={[styles.empty, { color: colors.textSecondary }]}>
+        No articles in this category. Pull to refresh.
+      </Text>
+    );
+  }, [showLoading, showError, colors.textSecondary]);
+
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FlatList
+        data={showLoading || showError ? [] : filteredArticles}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={listEmpty}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        initialNumToRender={8}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews={Platform.OS !== 'web'}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+          />
+        }
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scroll: { flex: 1 },
   scrollContent: {
     paddingBottom: 32,
-    flexGrow: 0,
+    flexGrow: 1,
   },
   headerWrap: { paddingHorizontal: 20, paddingTop: 60 },
   categoriesContent: {
@@ -205,9 +239,8 @@ const styles = StyleSheet.create({
     gap: 6,
     marginRight: 10,
   },
-  list: {
+  listItem: {
     paddingHorizontal: 20,
-    paddingTop: 4,
   },
   stateWrap: {
     alignItems: 'center',

@@ -103,6 +103,7 @@ export function PomodoroScreen({ navigation }: Props) {
   const [quote] = useState(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pulseLoopRef = useRef<Animated.CompositeAnimation | null>(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
   const headerOpacity = useRef(new Animated.Value(0)).current;
@@ -156,18 +157,24 @@ export function PomodoroScreen({ navigation }: Props) {
 
   useEffect(() => {
     if (running) {
-      Animated.loop(
+      pulseLoopRef.current = Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, { toValue: 1.04, duration: 1000, useNativeDriver: true }),
           Animated.timing(pulseAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
         ]),
-      ).start();
+      );
+      pulseLoopRef.current.start();
       Animated.timing(glowAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
     } else {
+      pulseLoopRef.current?.stop();
       pulseAnim.stopAnimation();
       Animated.timing(pulseAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start();
       Animated.timing(glowAnim, { toValue: 0, duration: 400, useNativeDriver: true }).start();
     }
+
+    return () => {
+      pulseLoopRef.current?.stop();
+    };
   }, [running, pulseAnim, glowAnim]);
 
   const notifyPhaseEnd = async (title: string, body: string) => {

@@ -18,13 +18,9 @@ type Props = NativeStackScreenProps<StudyStackParamList, 'Review'>;
 export function ReviewScreen({ navigation, route }: Props) {
   const { colors } = useTheme();
   const { deckId } = route.params;
-  const decks = useFlashcardsStore((s) => s.decks);
-  const getDueCards = useFlashcardsStore((s) => s.getDueCards);
-  const getDeckCards = useFlashcardsStore((s) => s.getDeckCards);
+  const deck = useFlashcardsStore((s) => s.decks.find((d) => d.id === deckId));
   const reviewCardWithRating = useFlashcardsStore((s) => s.reviewCardWithRating);
   const completeStudySession = useFlashcardsStore((s) => s.completeStudySession);
-
-  const deck = decks.find((d) => d.id === deckId);
   const [queue] = useState(() => {
     const due = useFlashcardsStore.getState().getDueCards(deckId);
     if (due.length > 0) {

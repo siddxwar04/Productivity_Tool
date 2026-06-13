@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTheme } from '../../theme/ThemeContext';
@@ -20,13 +20,19 @@ export function AnalyticsScreen({ navigation }: Props) {
   const dailyHistory = useAnalyticsStore((s) => s.dailyHistory);
   const goalHours = useUserProfileStore((s) => s.goals.studyHoursPerDay);
 
-  const last7 = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
-    const key = d.toISOString().split('T')[0];
-    return { label: d.toLocaleDateString('en', { weekday: 'short' }), minutes: dailyHistory[key] ?? 0 };
-  });
-  const maxMin = Math.max(...last7.map((d) => d.minutes), goalHours * 60, 1);
+  const last7 = useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      const key = d.toISOString().split('T')[0];
+      return { label: d.toLocaleDateString('en', { weekday: 'short' }), minutes: dailyHistory[key] ?? 0 };
+    });
+  }, [dailyHistory]);
+
+  const maxMin = useMemo(
+    () => Math.max(...last7.map((d) => d.minutes), goalHours * 60, 1),
+    [last7, goalHours],
+  );
 
   return (
     <ScreenWrapper>

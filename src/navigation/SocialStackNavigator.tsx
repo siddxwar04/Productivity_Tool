@@ -1,11 +1,19 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SocialHubScreen } from '../screens/Social/SocialHubScreen';
-import { GroupsScreen } from '../screens/Social/GroupsScreen';
-import { PeersScreen } from '../screens/Social/PeersScreen';
+import { lazyNamedScreen } from './lazyScreen';
 import { SocialStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<SocialStackParamList>();
+
+const GroupsScreen = lazyNamedScreen(
+  () => require('../screens/Social/GroupsScreen'),
+  'GroupsScreen',
+);
+const PeersScreen = lazyNamedScreen(
+  () => require('../screens/Social/PeersScreen'),
+  'PeersScreen',
+);
 
 export function SocialStackNavigator() {
   return (

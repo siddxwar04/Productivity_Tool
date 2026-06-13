@@ -1,14 +1,31 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { WellnessHubScreen } from '../screens/Wellness/WellnessHubScreen';
-import { LogMoodScreen } from '../screens/Wellness/MoodScreen';
-import { SleepScreen } from '../screens/Wellness/SleepScreen';
-import { BreaksScreen } from '../screens/Wellness/BreaksScreen';
-import { YogaScreen } from '../screens/Wellness/YogaScreen';
-import { YogaPlayerScreen } from '../screens/Wellness/YogaPlayerScreen';
+import { lazyNamedScreen } from './lazyScreen';
 import { WellnessStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<WellnessStackParamList>();
+
+const LogMoodScreen = lazyNamedScreen(
+  () => require('../screens/Wellness/MoodScreen'),
+  'LogMoodScreen',
+);
+const SleepScreen = lazyNamedScreen(
+  () => require('../screens/Wellness/SleepScreen'),
+  'SleepScreen',
+);
+const BreaksScreen = lazyNamedScreen(
+  () => require('../screens/Wellness/BreaksScreen'),
+  'BreaksScreen',
+);
+const YogaScreen = lazyNamedScreen(
+  () => require('../screens/Wellness/YogaScreen'),
+  'YogaScreen',
+);
+const YogaPlayerScreen = lazyNamedScreen(
+  () => require('../screens/Wellness/YogaPlayerScreen'),
+  'YogaPlayerScreen',
+);
 
 export function WellnessStackNavigator() {
   return (

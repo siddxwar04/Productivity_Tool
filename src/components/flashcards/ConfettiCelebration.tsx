@@ -24,26 +24,33 @@ export function ConfettiCelebration({ active }: ConfettiCelebrationProps) {
       return;
     }
 
-    const animations = particles.map((particle) =>
-      Animated.parallel([
-        Animated.timing(particle.y, {
-          toValue: 420 + Math.random() * 120,
-          duration: 1800 + Math.random() * 800,
-          useNativeDriver: true,
-        }),
-        Animated.sequence([
-          Animated.timing(particle.opacity, { toValue: 1, duration: 120, useNativeDriver: true }),
-          Animated.timing(particle.opacity, { toValue: 0, duration: 900, delay: 700, useNativeDriver: true }),
+    const animation = Animated.stagger(
+      40,
+      particles.map((particle) =>
+        Animated.parallel([
+          Animated.timing(particle.y, {
+            toValue: 420 + Math.random() * 120,
+            duration: 1800 + Math.random() * 800,
+            useNativeDriver: true,
+          }),
+          Animated.sequence([
+            Animated.timing(particle.opacity, { toValue: 1, duration: 120, useNativeDriver: true }),
+            Animated.timing(particle.opacity, { toValue: 0, duration: 900, delay: 700, useNativeDriver: true }),
+          ]),
+          Animated.timing(particle.rotate, {
+            toValue: 1,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
         ]),
-        Animated.timing(particle.rotate, {
-          toValue: 1,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-      ]),
+      ),
     );
 
-    Animated.stagger(40, animations).start();
+    animation.start();
+
+    return () => {
+      animation.stop();
+    };
   }, [active, particles]);
 
   if (!active) {
