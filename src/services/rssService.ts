@@ -71,6 +71,20 @@ const readLink = (value: RawRssItem['link']): string => {
   return value['@_href'] ?? value['#text'] ?? '';
 };
 
+const readGuid = (value: RawRssItem['guid'] | RawRssItem['id']): string => {
+  if (!value) return '';
+  if (typeof value === 'string') return value.trim();
+  return (value['#text'] ?? '').trim();
+};
+
+const buildArticleId = (item: RawRssItem, source: FeedSource, index: number): string => {
+  const guid = readGuid(item.guid) || readGuid(item.id);
+  const link = readLink(item.link);
+  if (guid) return guid;
+  if (link) return link;
+  return `${source.name}-${index}`;
+};
+
 const fetchXml = async (url: string): Promise<string> => {
   if (Platform.OS !== 'web') {
     const res = await fetch(url, {
@@ -132,7 +146,7 @@ const parseItems = (xml: string, source: FeedSource): Article[] => {
           : [];
 
   return rawItems.map((item, index) => ({
-    id: String(item.guid ?? item.id ?? readLink(item.link) ?? `${source.name}-${index}`),
+    id: buildArticleId(item, source, index),
     title: readText(item.title).trim(),
     description: stripHtml(String(item.description ?? item.summary ?? item['content:encoded'] ?? '')),
     url: readLink(item.link),

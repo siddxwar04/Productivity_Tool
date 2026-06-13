@@ -34,10 +34,14 @@ export const useArticleStore = create<ArticleState>()(
       selectedCategory: 'all',
 
       fetchArticles: async () => {
-        const { lastFetched, isLoading } = get();
+        const { lastFetched, isLoading, articles } = get();
         const now = Date.now();
         if (isLoading) return;
-        if (lastFetched && now - lastFetched < CACHE_DURATION_MS) return;
+        if (lastFetched && now - lastFetched < CACHE_DURATION_MS) {
+          const normalized = resolveArticles(articles);
+          set({ articles: normalized });
+          return;
+        }
 
         set({ isLoading: true, error: null });
         try {

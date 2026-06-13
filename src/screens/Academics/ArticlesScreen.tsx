@@ -1,13 +1,14 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
-  View, Text, TouchableOpacity, ScrollView, FlatList,
-  ActivityIndicator, RefreshControl, StyleSheet, Animated, Alert,
+  View, Text, TouchableOpacity, ScrollView,
+  ActivityIndicator, RefreshControl, StyleSheet, Animated, Alert, Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTheme } from '../../theme/ThemeContext';
 import { ScreenHeader } from '../../components/ui/ScreenHeader';
 import { ArticleCard } from '../../components/ui/ArticleCard';
 import { useArticleStore } from '../../stores/articleStore';
+import { getArticleKey } from '../../services/articleMergeService';
 import { ARTICLE_CATEGORIES, Article, ArticleCategory } from '../../types/article';
 import { isValidArticleUrl } from '../../utils/articleUrl';
 import { StudyStackParamList } from '../../navigation/types';
@@ -30,8 +31,16 @@ const CategoryCard = ({ cat, isActive, onPress }: { cat: ArticleCategory; isActi
 
   const handlePress = () => {
     Animated.sequence([
-      Animated.timing(scaleAnim, { toValue: 0.92, duration: 80, useNativeDriver: true }),
-      Animated.timing(scaleAnim, { toValue: 1,    duration: 120, useNativeDriver: true }),
+      Animated.timing(scaleAnim, {
+        toValue: 0.92,
+        duration: 80,
+        useNativeDriver: Platform.OS !== 'web',
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 120,
+        useNativeDriver: Platform.OS !== 'web',
+      }),
     ]).start();
     onPress();
   };
@@ -66,20 +75,28 @@ export function ArticlesScreen({ navigation }: Props) {
   const isLoading = useArticleStore((s) => s.isLoading);
   const error = useArticleStore((s) => s.error);
   const selectedCategory = useArticleStore((s) => s.selectedCategory);
-  const fetchArticles = useArticleStore((s) => s.fetchArticles);
   const refreshArticles = useArticleStore((s) => s.refreshArticles);
   const setCategory = useArticleStore((s) => s.setCategory);
 
   const filteredArticles = useMemo(() => {
-    if (selectedCategory === 'all') return articles;
-    return articles.filter((a) => a.category === selectedCategory);
+    const scoped = selectedCategory === 'all'
+      ? articles
+      : articles.filter((a) => a.category === selectedCategory);
+
+    const seen = new Set<string>();
+    return scoped.filter((article) => {
+      const key = getArticleKey(article);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }, [articles, selectedCategory]);
 
   useEffect(() => {
-    void fetchArticles();
-  }, [fetchArticles]);
+    void useArticleStore.getState().fetchArticles();
+  }, []);
 
-  const openArticle = (article: Article) => {
+  const openArticle = useCallback((article: Article) => {
     if (!isValidArticleUrl(article.url)) {
       Alert.alert(
         'Link unavailable',
@@ -89,11 +106,78 @@ export function ArticlesScreen({ navigation }: Props) {
     }
 
     navigation.navigate('ArticleViewer', { url: article.url.trim(), title: article.title });
-  };
+  }, [navigation]);
 
-  const handleCategoryPress = (cat: ArticleCategory) => {
+  const handleRefresh = useCallback(() => {
+    void refreshArticles();
+  }, [refreshArticles]);
+
+  const handleCategoryPress = useCallback((cat: ArticleCategory) => {
     setCategory(cat);
-  };
+  }, [setCategory]);
+
+  const listContent = useMemo(() => {
+    if (isLoading && filteredArticles.length === 0) {
+      return (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading articles…</Text>
+        </View>
+      );
+    }
+
+    if (error && filteredArticles.length === 0) {
+      return (
+        <View style={styles.center}>
+          <Text style={[styles.error, { color: colors.textSecondary }]}>{error}</Text>
+          <TouchableOpacity
+            onPress={handleRefresh}
+            style={[styles.retry, { backgroundColor: colors.primary }]}
+          >
+            <Text style={[styles.retryText, { color: colors.surface }]}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return (
+      <ScrollView
+        style={styles.listScroll}
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+          />
+        }
+      >
+        {filteredArticles.length === 0 ? (
+          <Text style={[styles.empty, { color: colors.textSecondary }]}>
+            No articles in this category. Pull to refresh.
+          </Text>
+        ) : (
+          filteredArticles.map((item) => (
+            <ArticleCard
+              key={`${item.id}-${getArticleKey(item)}`}
+              article={item}
+              onPress={openArticle}
+            />
+          ))
+        )}
+      </ScrollView>
+    );
+  }, [
+    colors.primary,
+    colors.surface,
+    colors.textSecondary,
+    error,
+    filteredArticles,
+    handleRefresh,
+    isLoading,
+    openArticle,
+  ]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -116,42 +200,7 @@ export function ArticlesScreen({ navigation }: Props) {
         ))}
       </ScrollView>
 
-      {isLoading && filteredArticles.length === 0 ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading articles…</Text>
-        </View>
-      ) : error && filteredArticles.length === 0 ? (
-        <View style={styles.center}>
-          <Text style={[styles.error, { color: colors.textSecondary }]}>{error}</Text>
-          <TouchableOpacity
-            onPress={() => void refreshArticles()}
-            style={[styles.retry, { backgroundColor: colors.primary }]}
-          >
-            <Text style={[styles.retryText, { color: colors.surface }]}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <FlatList
-          data={filteredArticles}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <ArticleCard article={item} onPress={openArticle} />}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={isLoading}
-              onRefresh={() => void refreshArticles()}
-              tintColor={colors.primary}
-            />
-          }
-          ListEmptyComponent={
-            <Text style={[styles.empty, { color: colors.textSecondary }]}>
-              No articles in this category. Pull to refresh.
-            </Text>
-          }
-        />
-      )}
+      {listContent}
     </View>
   );
 }
@@ -159,9 +208,7 @@ export function ArticlesScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   headerWrap: { paddingHorizontal: 20, paddingTop: 60 },
-  categories: { maxHeight: 48, marginBottom: 8 },
-  categoriesContent: { paddingHorizontal: 20, gap: 8 },
-  chip: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, marginRight: 8 },
+  listScroll: { flex: 1 },
   list: { padding: 20, paddingTop: 8, paddingBottom: 32 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
   loadingText: { marginTop: 12, fontSize: 14 },
