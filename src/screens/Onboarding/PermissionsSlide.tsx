@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { Button } from '../../components/ui/Button';
-import { requestNotificationPermissions, setupNotificationChannels, rescheduleAllNotifications } from '../../services/notifications/notificationService';
+import {
+  isNotificationSupported,
+  requestNotificationPermissions,
+  setupNotificationChannels,
+  rescheduleAllNotifications,
+} from '../../services/notifications/notificationService';
 
 interface Props {
   onFinish: () => void;
@@ -16,21 +21,32 @@ export function PermissionsSlide({ onFinish, onBack }: Props) {
 
   const handleEnable = async () => {
     setLoading(true);
-    await setupNotificationChannels();
-    const ok = await requestNotificationPermissions();
-    setGranted(ok);
-    if (ok) await rescheduleAllNotifications();
-    setLoading(false);
-  };
 
-  const handleFinish = async () => {
-    if (granted === null) {
-      setLoading(true);
+    try {
+      if (!isNotificationSupported()) {
+        console.warn('[PermissionsSlide] Notifications unavailable on this platform.');
+        setGranted(false);
+        return;
+      }
+
       await setupNotificationChannels();
       const ok = await requestNotificationPermissions();
-      if (ok) await rescheduleAllNotifications();
+      setGranted(ok);
+
+      if (ok) {
+        await rescheduleAllNotifications();
+      } else {
+        console.warn('[PermissionsSlide] Notification permission was not granted.');
+      }
+    } catch (error) {
+      console.error('[PermissionsSlide] Failed to enable notifications:', error);
+      setGranted(false);
+    } finally {
       setLoading(false);
     }
+  };
+
+  const handleSkip = () => {
     onFinish();
   };
 
@@ -66,7 +82,7 @@ export function PermissionsSlide({ onFinish, onBack }: Props) {
         ) : (
           <View style={styles.rightActions}>
             <Button title="Enable" onPress={handleEnable} loading={loading} style={styles.half} />
-            <Button title="Skip for now" onPress={handleFinish} variant="secondary" style={styles.half} />
+            <Button title="Skip for now" onPress={handleSkip} variant="secondary" style={styles.half} />
           </View>
         )}
       </View>

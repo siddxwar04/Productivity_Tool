@@ -5,6 +5,9 @@ import { useDeadlinesStore } from '../../stores/deadlinesStore';
 import { NOTIFICATION_CHANNELS, NOTIFICATION_IDS } from './notificationTypes';
 import { parseTimeString } from '../../utils/helpers';
 
+const DEFAULT_TIMEOUT_MS = 8000;
+const RESCHEDULE_TIMEOUT_MS = 15000;
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -15,28 +18,89 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export async function requestNotificationPermissions(): Promise<boolean> {
-  const { status: existing } = await Notifications.getPermissionsAsync();
-  if (existing === 'granted') return true;
+async function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number,
+  operation: string,
+): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-  const { status } = await Notifications.requestPermissionsAsync();
-  return status === 'granted';
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`${operation} timed out after ${ms}ms`));
+    }, ms);
+  });
+
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId);
+    }
+  }
+}
+
+/** Scheduled local notifications are supported on iOS/Android only. */
+export function isNotificationSupported(): boolean {
+  return Platform.OS === 'ios' || Platform.OS === 'android';
+}
+
+export async function requestNotificationPermissions(): Promise<boolean> {
+  if (!isNotificationSupported()) {
+    console.warn(
+      '[notificationService] Notifications are not supported on this platform; skipping permission request.',
+    );
+    return false;
+  }
+
+  try {
+    const { status: existing } = await withTimeout(
+      Notifications.getPermissionsAsync(),
+      DEFAULT_TIMEOUT_MS,
+      'getPermissionsAsync',
+    );
+    if (existing === 'granted') {
+      return true;
+    }
+
+    const { status } = await withTimeout(
+      Notifications.requestPermissionsAsync(),
+      DEFAULT_TIMEOUT_MS,
+      'requestPermissionsAsync',
+    );
+    return status === 'granted';
+  } catch (error) {
+    console.error('[notificationService] requestNotificationPermissions failed:', error);
+    return false;
+  }
 }
 
 export async function setupNotificationChannels(): Promise<void> {
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync(NOTIFICATION_CHANNELS.REMINDERS, {
-      name: 'Reminders',
-      importance: Notifications.AndroidImportance.DEFAULT,
-    });
-    await Notifications.setNotificationChannelAsync(NOTIFICATION_CHANNELS.DEADLINES, {
-      name: 'Deadlines',
-      importance: Notifications.AndroidImportance.HIGH,
-    });
-    await Notifications.setNotificationChannelAsync(NOTIFICATION_CHANNELS.SOCIAL, {
-      name: 'Social',
-      importance: Notifications.AndroidImportance.DEFAULT,
-    });
+  if (Platform.OS !== 'android') {
+    return;
+  }
+
+  try {
+    await withTimeout(
+      Promise.all([
+        Notifications.setNotificationChannelAsync(NOTIFICATION_CHANNELS.REMINDERS, {
+          name: 'Reminders',
+          importance: Notifications.AndroidImportance.DEFAULT,
+        }),
+        Notifications.setNotificationChannelAsync(NOTIFICATION_CHANNELS.DEADLINES, {
+          name: 'Deadlines',
+          importance: Notifications.AndroidImportance.HIGH,
+        }),
+        Notifications.setNotificationChannelAsync(NOTIFICATION_CHANNELS.SOCIAL, {
+          name: 'Social',
+          importance: Notifications.AndroidImportance.DEFAULT,
+        }),
+      ]),
+      DEFAULT_TIMEOUT_MS,
+      'setNotificationChannelAsync',
+    );
+  } catch (error) {
+    console.error('[notificationService] setupNotificationChannels failed:', error);
   }
 }
 
@@ -96,15 +160,42 @@ async function scheduleDeadlineNotifications(): Promise<void> {
 }
 
 export async function cancelAllScheduledNotifications(): Promise<void> {
-  await Notifications.cancelAllScheduledNotificationsAsync();
+  if (!isNotificationSupported()) {
+    return;
+  }
+
+  try {
+    await withTimeout(
+      Notifications.cancelAllScheduledNotificationsAsync(),
+      DEFAULT_TIMEOUT_MS,
+      'cancelAllScheduledNotificationsAsync',
+    );
+  } catch (error) {
+    console.error('[notificationService] cancelAllScheduledNotifications failed:', error);
+  }
 }
 
 export async function rescheduleAllNotifications(): Promise<void> {
+  if (!isNotificationSupported()) {
+    console.warn('[notificationService] Skipping reschedule on unsupported platform.');
+    return;
+  }
+
+  try {
+    await withTimeout(rescheduleAllNotificationsInternal(), RESCHEDULE_TIMEOUT_MS, 'rescheduleAllNotifications');
+  } catch (error) {
+    console.error('[notificationService] rescheduleAllNotifications failed:', error);
+  }
+}
+
+async function rescheduleAllNotificationsInternal(): Promise<void> {
   const settings = useNotificationSettingsStore.getState();
   await cancelAllScheduledNotifications();
 
   const { status } = await Notifications.getPermissionsAsync();
-  if (status !== 'granted') return;
+  if (status !== 'granted') {
+    return;
+  }
 
   if (settings.habitDailyReminder.enabled) {
     await scheduleDailyNotification(
