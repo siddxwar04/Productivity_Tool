@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -12,70 +12,15 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFlashcardsStore } from '../../stores/flashcardsStore';
+import { QUIZ_QUESTIONS } from '../../data/quizQuestions';
 import { StudyStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'StudyBuddy'>;
 
 const { height } = Dimensions.get('window');
 
-interface QuizCard {
-  id: string;
-  term: string;
-  answer: string;
-  hint?: string;
-  tag?: string;
-}
-
-const SAMPLE_CARDS: QuizCard[] = [
-  {
-    id: 'sample-1',
-    term: 'Mitochondria',
-    answer: 'The powerhouse of the cell — generates ATP through cellular respiration.',
-    hint: 'Think about energy production in cells.',
-    tag: 'Biology',
-  },
-  {
-    id: 'sample-2',
-    term: 'Photosynthesis',
-    answer: 'Process by which plants convert sunlight, water, and CO₂ into glucose and oxygen.',
-    hint: 'Plants + sunlight = food.',
-    tag: 'Biology',
-  },
-  {
-    id: 'sample-3',
-    term: "Newton's 2nd Law",
-    answer: 'Force equals mass times acceleration. F = ma',
-    hint: 'A classic formula involving force.',
-    tag: 'Physics',
-  },
-];
-
-function buildHint(answer: string): string {
-  const words = answer.trim().split(/\s+/);
-  if (words.length <= 3) return `${words[0] ?? ''}...`;
-  return `${words.slice(0, 3).join(' ')}...`;
-}
-
 export function StudyBuddyScreen({ navigation }: Props) {
-  const storeCards = useFlashcardsStore((s) => s.cards);
-  const decks = useFlashcardsStore((s) => s.decks);
-
-  const quizCards = useMemo<QuizCard[]>(() => {
-    if (storeCards.length > 0) {
-      return storeCards.slice(0, 10).map((item) => {
-        const deck = decks.find((d) => d.id === item.deckId);
-        return {
-          id: item.id,
-          term: item.front,
-          answer: item.back,
-          hint: buildHint(item.back),
-          tag: deck?.name ?? 'Study',
-        };
-      });
-    }
-    return SAMPLE_CARDS;
-  }, [decks, storeCards]);
+  const quizCards = QUIZ_QUESTIONS;
 
   const [sessionKey, setSessionKey] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
