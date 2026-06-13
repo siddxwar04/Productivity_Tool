@@ -1,0 +1,163 @@
+import React, { useEffect, useMemo, useRef } from 'react';
+import {
+  View, Text, TouchableOpacity, ScrollView, FlatList,
+  ActivityIndicator, RefreshControl, StyleSheet, Animated,
+} from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useTheme } from '../../theme/ThemeContext';
+import { ScreenHeader } from '../../components/ui/ScreenHeader';
+import { ArticleCard } from '../../components/ui/ArticleCard';
+import { useArticleStore } from '../../stores/articleStore';
+import { ARTICLE_CATEGORIES, Article, ArticleCategory } from '../../types/article';
+import { StudyStackParamList } from '../../navigation/types';
+
+type Props = NativeStackScreenProps<StudyStackParamList, 'Articles'>;
+
+const CATEGORY_CONFIG: Record<ArticleCategory, { emoji: string; color: string; labelColor: string; label: string }> = {
+  all:            { emoji: '✦',  color: '#1e1a2e', labelColor: '#a78bfa', label: 'All'        },
+  studytips:      { emoji: '📖', color: '#1a2640', labelColor: '#60a5fa', label: 'Study tips'  },
+  productivity:   { emoji: '⚡', color: '#1a2a1a', labelColor: '#4ade80', label: 'Productivity'},
+  examprep:       { emoji: '🎯', color: '#2a1e10', labelColor: '#fb923c', label: 'Exam prep'   },
+  timemanagement: { emoji: '⏱', color: '#1e2a2a', labelColor: '#2dd4bf', label: 'Time mgmt'   },
+  wellness:       { emoji: '🧘', color: '#2a1a2a', labelColor: '#e879f9', label: 'Wellness'    },
+  notetaking:     { emoji: '📝', color: '#1a2020', labelColor: '#34d399', label: 'Note taking' },
+};
+
+const CategoryCard = ({ cat, isActive, onPress }: { cat: ArticleCategory; isActive: boolean; onPress: () => void }) => {
+  const config = CATEGORY_CONFIG[cat];
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, { toValue: 0.92, duration: 80, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 1,    duration: 120, useNativeDriver: true }),
+    ]).start();
+    onPress();
+  };
+
+  return (
+    <TouchableOpacity onPress={handlePress} activeOpacity={1} style={{ alignItems: 'center', gap: 6, marginRight: 10 }}>
+      <Animated.View style={{
+        width: 56, height: 56, borderRadius: 18,
+        backgroundColor: config.color,
+        alignItems: 'center', justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: isActive ? 'rgba(255,255,255,0.4)' : 'transparent',
+        transform: [{ scale: scaleAnim }],
+      }}>
+        <Text style={{ fontSize: 22 }}>{config.emoji}</Text>
+      </Animated.View>
+      <Text style={{
+        fontSize: 10, fontWeight: '600',
+        color: config.labelColor,
+        opacity: isActive ? 1 : 0.5,
+        textAlign: 'center', maxWidth: 60,
+      }}>
+        {config.label}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
+export function ArticlesScreen({ navigation }: Props) {
+  const { colors } = useTheme();
+  const articles = useArticleStore((s) => s.articles);
+  const isLoading = useArticleStore((s) => s.isLoading);
+  const error = useArticleStore((s) => s.error);
+  const selectedCategory = useArticleStore((s) => s.selectedCategory);
+  const fetchArticles = useArticleStore((s) => s.fetchArticles);
+  const refreshArticles = useArticleStore((s) => s.refreshArticles);
+  const setCategory = useArticleStore((s) => s.setCategory);
+
+  const filteredArticles = useMemo(() => {
+    if (selectedCategory === 'all') return articles;
+    return articles.filter((a) => a.category === selectedCategory);
+  }, [articles, selectedCategory]);
+
+  useEffect(() => {
+    void fetchArticles();
+  }, [fetchArticles]);
+
+  const openArticle = (article: Article) => {
+    navigation.navigate('ArticleViewer', { url: article.url, title: article.title });
+  };
+
+  const handleCategoryPress = (cat: ArticleCategory) => {
+    setCategory(cat);
+  };
+
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={styles.headerWrap}>
+        <ScreenHeader title="Articles" onBack={() => navigation.goBack()} />
+      </View>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
+      >
+        {ARTICLE_CATEGORIES.map((cat) => (
+          <CategoryCard
+            key={cat}
+            cat={cat}
+            isActive={selectedCategory === cat}
+            onPress={() => handleCategoryPress(cat)}
+          />
+        ))}
+      </ScrollView>
+
+      {isLoading && filteredArticles.length === 0 ? (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading articles…</Text>
+        </View>
+      ) : error && filteredArticles.length === 0 ? (
+        <View style={styles.center}>
+          <Text style={[styles.error, { color: colors.textSecondary }]}>{error}</Text>
+          <TouchableOpacity
+            onPress={() => void refreshArticles()}
+            style={[styles.retry, { backgroundColor: colors.primary }]}
+          >
+            <Text style={[styles.retryText, { color: colors.surface }]}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredArticles}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <ArticleCard article={item} onPress={openArticle} />}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={() => void refreshArticles()}
+              tintColor={colors.primary}
+            />
+          }
+          ListEmptyComponent={
+            <Text style={[styles.empty, { color: colors.textSecondary }]}>
+              No articles in this category. Pull to refresh.
+            </Text>
+          }
+        />
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  headerWrap: { paddingHorizontal: 20, paddingTop: 60 },
+  categories: { maxHeight: 48, marginBottom: 8 },
+  categoriesContent: { paddingHorizontal: 20, gap: 8 },
+  chip: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, marginRight: 8 },
+  list: { padding: 20, paddingTop: 8, paddingBottom: 32 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
+  loadingText: { marginTop: 12, fontSize: 14 },
+  error: { fontSize: 14, textAlign: 'center', marginBottom: 16 },
+  retry: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 10 },
+  retryText: { fontWeight: '600' },
+  empty: { textAlign: 'center', marginTop: 40 },
+});
