@@ -72,7 +72,11 @@ export interface Flashcard {
   back: string;
   deckId: string;
   lastReviewed?: string;
+  nextReviewAt?: string;
   ease: number;
+  interval?: number;
+  repetitions?: number;
+  mastered?: boolean;
 }
 
 export interface FlashcardDeck {
@@ -80,6 +84,8 @@ export interface FlashcardDeck {
   name: string;
   subjectId?: string;
   color: string;
+  categoryIcon?: string;
+  lastStudiedAt?: string;
 }
 
 export interface GradeEntry {
@@ -94,12 +100,16 @@ export interface GradeEntry {
 export interface PlannerBlock {
   id: string;
   title: string;
+  subject?: string;
+  description?: string;
   subjectId?: string;
   dayOfWeek: number;
   startHour: number;
   startMinute: number;
   durationMinutes: number;
   color: string;
+  priority?: 'low' | 'medium' | 'high';
+  completed?: boolean;
 }
 
 export interface MoodEntry {
