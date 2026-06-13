@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, FlatList,
-  ActivityIndicator, RefreshControl, StyleSheet, Animated,
+  ActivityIndicator, RefreshControl, StyleSheet, Animated, Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTheme } from '../../theme/ThemeContext';
@@ -9,6 +9,7 @@ import { ScreenHeader } from '../../components/ui/ScreenHeader';
 import { ArticleCard } from '../../components/ui/ArticleCard';
 import { useArticleStore } from '../../stores/articleStore';
 import { ARTICLE_CATEGORIES, Article, ArticleCategory } from '../../types/article';
+import { isValidArticleUrl } from '../../utils/articleUrl';
 import { StudyStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'Articles'>;
@@ -79,7 +80,15 @@ export function ArticlesScreen({ navigation }: Props) {
   }, [fetchArticles]);
 
   const openArticle = (article: Article) => {
-    navigation.navigate('ArticleViewer', { url: article.url, title: article.title });
+    if (!isValidArticleUrl(article.url)) {
+      Alert.alert(
+        'Link unavailable',
+        'This article link is missing or invalid. Try another article or pull to refresh.',
+      );
+      return;
+    }
+
+    navigation.navigate('ArticleViewer', { url: article.url.trim(), title: article.title });
   };
 
   const handleCategoryPress = (cat: ArticleCategory) => {
