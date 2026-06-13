@@ -46,7 +46,7 @@ const CategoryCard = ({ cat, isActive, onPress }: { cat: ArticleCategory; isActi
   };
 
   return (
-    <TouchableOpacity onPress={handlePress} activeOpacity={1} style={{ alignItems: 'center', gap: 6, marginRight: 10 }}>
+    <TouchableOpacity onPress={handlePress} activeOpacity={1} style={styles.categoryChip}>
       <Animated.View style={{
         width: 56, height: 56, borderRadius: 18,
         backgroundColor: config.color,
@@ -116,34 +116,14 @@ export function ArticlesScreen({ navigation }: Props) {
     setCategory(cat);
   }, [setCategory]);
 
-  const listContent = useMemo(() => {
-    if (isLoading && filteredArticles.length === 0) {
-      return (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading articles…</Text>
-        </View>
-      );
-    }
+  const showLoading = isLoading && filteredArticles.length === 0;
+  const showError = error && filteredArticles.length === 0;
 
-    if (error && filteredArticles.length === 0) {
-      return (
-        <View style={styles.center}>
-          <Text style={[styles.error, { color: colors.textSecondary }]}>{error}</Text>
-          <TouchableOpacity
-            onPress={handleRefresh}
-            style={[styles.retry, { backgroundColor: colors.primary }]}
-          >
-            <Text style={[styles.retryText, { color: colors.surface }]}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-
-    return (
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
-        style={styles.listScroll}
-        contentContainerStyle={styles.list}
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -153,67 +133,91 @@ export function ArticlesScreen({ navigation }: Props) {
           />
         }
       >
-        {filteredArticles.length === 0 ? (
+        <View style={styles.headerWrap}>
+          <ScreenHeader title="Articles" onBack={() => navigation.goBack()} />
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoriesContent}
+          nestedScrollEnabled
+        >
+          {ARTICLE_CATEGORIES.map((cat) => (
+            <CategoryCard
+              key={cat}
+              cat={cat}
+              isActive={selectedCategory === cat}
+              onPress={() => handleCategoryPress(cat)}
+            />
+          ))}
+        </ScrollView>
+
+        {showLoading ? (
+          <View style={styles.stateWrap}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading articles…</Text>
+          </View>
+        ) : showError ? (
+          <View style={styles.stateWrap}>
+            <Text style={[styles.error, { color: colors.textSecondary }]}>{error}</Text>
+            <TouchableOpacity
+              onPress={handleRefresh}
+              style={[styles.retry, { backgroundColor: colors.primary }]}
+            >
+              <Text style={[styles.retryText, { color: colors.surface }]}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        ) : filteredArticles.length === 0 ? (
           <Text style={[styles.empty, { color: colors.textSecondary }]}>
             No articles in this category. Pull to refresh.
           </Text>
         ) : (
-          filteredArticles.map((item) => (
-            <ArticleCard
-              key={`${item.id}-${getArticleKey(item)}`}
-              article={item}
-              onPress={openArticle}
-            />
-          ))
+          <View style={styles.list}>
+            {filteredArticles.map((item) => (
+              <ArticleCard
+                key={`${item.id}-${getArticleKey(item)}`}
+                article={item}
+                onPress={openArticle}
+              />
+            ))}
+          </View>
         )}
       </ScrollView>
-    );
-  }, [
-    colors.primary,
-    colors.surface,
-    colors.textSecondary,
-    error,
-    filteredArticles,
-    handleRefresh,
-    isLoading,
-    openArticle,
-  ]);
-
-  return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.headerWrap}>
-        <ScreenHeader title="Articles" onBack={() => navigation.goBack()} />
-      </View>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
-      >
-        {ARTICLE_CATEGORIES.map((cat) => (
-          <CategoryCard
-            key={cat}
-            cat={cat}
-            isActive={selectedCategory === cat}
-            onPress={() => handleCategoryPress(cat)}
-          />
-        ))}
-      </ScrollView>
-
-      {listContent}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  scroll: { flex: 1 },
+  scrollContent: {
+    paddingBottom: 32,
+    flexGrow: 0,
+  },
   headerWrap: { paddingHorizontal: 20, paddingTop: 60 },
-  listScroll: { flex: 1 },
-  list: { padding: 20, paddingTop: 8, paddingBottom: 32 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
+  categoriesContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  categoryChip: {
+    alignItems: 'center',
+    gap: 6,
+    marginRight: 10,
+  },
+  list: {
+    paddingHorizontal: 20,
+    paddingTop: 4,
+  },
+  stateWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+    paddingHorizontal: 40,
+  },
   loadingText: { marginTop: 12, fontSize: 14 },
   error: { fontSize: 14, textAlign: 'center', marginBottom: 16 },
   retry: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 10 },
   retryText: { fontWeight: '600' },
-  empty: { textAlign: 'center', marginTop: 40 },
+  empty: { textAlign: 'center', marginTop: 24, paddingHorizontal: 20 },
 });

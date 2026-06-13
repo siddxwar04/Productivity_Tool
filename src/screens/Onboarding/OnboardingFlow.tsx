@@ -67,6 +67,10 @@ export function OnboardingFlow() {
     triggerReward('gpa_goal_set');
   };
 
+  if (step === 0) {
+    return <WelcomeSlide onContinue={() => setStep(1)} currentPage={0} />;
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.dots}>
@@ -82,7 +86,6 @@ export function OnboardingFlow() {
       </View>
 
       <View style={styles.content}>
-        {step === 0 && <WelcomeSlide onContinue={() => setStep(1)} />}
         {step === 1 && (
           <StudyInfoSlide
             displayName={displayName}
