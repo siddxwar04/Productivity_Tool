@@ -405,10 +405,10 @@ export function PomodoroScreen({ navigation }: Props) {
                     stroke={cfg.color[0]}
                     strokeWidth={STROKE}
                     fill="transparent"
-                    strokeDasharray={`${CIRCUMFERENCE} ${CIRCUMFERENCE}`}
-                    strokeDashoffset={strokeDashoffset}
+                    strokeDasharray={[CIRCUMFERENCE, CIRCUMFERENCE]}
+                    strokeDashoffset={isFinite(strokeDashoffset) ? strokeDashoffset : 0}
                     strokeLinecap="round"
-                    rotation="-90"
+                    rotation={-90}
                     origin={`${SVG_SIZE / 2}, ${SVG_SIZE / 2}`}
                   />
                 </Svg>

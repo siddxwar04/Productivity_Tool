@@ -7,7 +7,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '../../theme/ThemeContext';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { Card } from '../../components/ui/Card';
-import { ToggleRow } from '../../components/ui/ToggleRow';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useUserProfileStore } from '../../stores/userProfileStore';
 import { AppearanceMode } from '../../types';
@@ -40,6 +39,7 @@ export function SettingsScreen({ navigation }: Props) {
   const setDisplayName = useUserProfileStore((s) => s.setDisplayName);
   const setUniversity = useUserProfileStore((s) => s.setUniversity);
   const setCourse = useUserProfileStore((s) => s.setCourse);
+  const replayOnboarding = useUserProfileStore((s) => s.replayOnboarding);
 
   const [newApp, setNewApp] = useState('');
   const [nameEdit, setNameEdit] = useState(displayName);
@@ -54,10 +54,24 @@ export function SettingsScreen({ navigation }: Props) {
     Alert.alert('Saved', 'Your profile has been updated.');
   };
 
+  const confirmReplayOnboarding = () => {
+    Alert.alert(
+      'Show welcome screen',
+      'You will see the StudyFlow logo and onboarding again. Your saved data stays intact.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Continue',
+          onPress: () => replayOnboarding(),
+        },
+      ],
+    );
+  };
+
   const confirmClear = () => {
     Alert.alert(
       'Clear all data',
-      'This will permanently delete all your StudyFlow data. This cannot be undone.',
+      'This will permanently delete all your StudyFlow data and return you to the welcome screen. This cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -171,6 +185,9 @@ export function SettingsScreen({ navigation }: Props) {
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionRow} onPress={exportCalendarIcs}>
           <Text style={[styles.actionText, { color: colors.primary }]}>Sync deadlines to calendar (.ics)</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.actionRow} onPress={confirmReplayOnboarding}>
+          <Text style={[styles.actionText, { color: colors.primary }]}>Show welcome screen again</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionRow} onPress={confirmClear}>
           <Text style={[styles.actionText, { color: colors.error }]}>Clear all data</Text>

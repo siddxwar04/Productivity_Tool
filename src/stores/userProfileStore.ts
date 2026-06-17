@@ -23,6 +23,7 @@ interface UserProfileState extends UserProfile {
   setGoals: (goals: UserGoals) => void;
   setAvatarUri: (uri: string | undefined) => void;
   completeOnboarding: (data: Partial<UserProfile>) => void;
+  replayOnboarding: () => void;
   addXp: (amount: number) => void;
   resetProfile: () => void;
   xpToNextLevel: () => number;
@@ -96,17 +97,42 @@ export const useUserProfileStore = create<UserProfileState>()(
           onboardingComplete: true,
           displayName: data.displayName?.trim() || 'Student',
         }),
+      replayOnboarding: () => {
+        set({ onboardingComplete: false });
+        // Ensure persisted storage updates immediately (web localStorage / native AsyncStorage)
+        void AsyncStorage.getItem('studyflow-user-profile').then((raw) => {
+          if (!raw) {
+            void AsyncStorage.setItem(
+              'studyflow-user-profile',
+              JSON.stringify({ state: { ...initialProfile, onboardingComplete: false }, version: 2 }),
+            );
+            return;
+          }
+          try {
+            const parsed = JSON.parse(raw) as { state?: PersistedProfile; version?: number };
+            const state = { ...(parsed.state ?? {}), onboardingComplete: false };
+            void AsyncStorage.setItem(
+              'studyflow-user-profile',
+              JSON.stringify({ ...parsed, state, version: parsed.version ?? 2 }),
+            );
+          } catch {
+            // ignore corrupt storage
+          }
+        });
+      },
       addXp: (amount) => {
         const state = get();
         let newXp = state.xp + amount;
         let newLevel = state.level;
-        while (newLevel < 10 && newXp >= getXpToNextLevel(newLevel)) {
-          newXp -= getXpToNextLevel(newLevel);
+        while (newLevel < 10) {
+          const range = getXpToNextLevel(newLevel) - getXpForLevel(newLevel);
+          if (newXp < range) break;
+          newXp -= range;
           newLevel += 1;
         }
         set({ xp: newXp, level: newLevel });
       },
-      resetProfile: () => set({ ...initialProfile }),
+      resetProfile: () => set({ ...initialProfile, hydrated: true }),
       xpToNextLevel: () => getXpToNextLevel(get().level),
       xpProgress: () => {
         const level = get().level;

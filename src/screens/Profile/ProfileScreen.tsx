@@ -37,6 +37,7 @@ export function ProfileScreen({ navigation }: Props) {
   const xpProgress = useUserProfileStore((s) => s.xpProgress);
   const xpToNextLevel = useUserProfileStore((s) => s.xpToNextLevel);
   const setAvatarUri = useUserProfileStore((s) => s.setAvatarUri);
+  const replayOnboarding = useUserProfileStore((s) => s.replayOnboarding);
 
   const totalStudyHours = useAnalyticsStore((s) => s.totalStudyHours);
   const totalPomodoros = useAnalyticsStore((s) => s.totalPomodoros);
@@ -61,6 +62,17 @@ export function ProfileScreen({ navigation }: Props) {
     if (!result.canceled && result.assets[0]) {
       setAvatarUri(result.assets[0].uri);
     }
+  };
+
+  const confirmReplayOnboarding = () => {
+    Alert.alert(
+      'Show welcome screen',
+      'You will see the StudyFlow logo and onboarding again. Your saved data stays intact.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Continue', onPress: () => replayOnboarding() },
+      ],
+    );
   };
 
   const shareAchievements = async () => {
@@ -163,6 +175,14 @@ export function ProfileScreen({ navigation }: Props) {
       </View>
 
       <TouchableOpacity
+        style={[styles.replayBtn, { borderColor: colors.border, backgroundColor: colors.surface }]}
+        onPress={confirmReplayOnboarding}
+      >
+        <Ionicons name="sparkles-outline" size={20} color={colors.primary} />
+        <Text style={[styles.replayText, { color: colors.primary }]}>Show welcome screen again</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
         style={[styles.shareBtn, { backgroundColor: colors.primary }]}
         onPress={shareAchievements}
       >
@@ -226,6 +246,17 @@ const styles = StyleSheet.create({
   },
   statValue: { fontSize: 22, fontWeight: '800' },
   statLabel: { fontSize: 12, marginTop: 4 },
+  replayBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  replayText: { fontSize: 15, fontWeight: '600' },
   shareBtn: {
     flexDirection: 'row',
     alignItems: 'center',
