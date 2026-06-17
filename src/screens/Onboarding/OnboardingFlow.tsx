@@ -16,7 +16,7 @@ import { PermissionsSlide } from './PermissionsSlide';
 const TOTAL_STEPS = 5;
 
 const defaultGoals: UserGoals = {
-  targetGpa: 3.5,
+  targetGpa: 8.0,
   studyHoursPerDay: 2,
   bedtimeHour: 23,
 };

@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+﻿import { Platform } from 'react-native';
 import { XMLParser } from 'fast-xml-parser';
 import { Article, ArticleCategory, FeedSource } from '../types/article';
 
@@ -88,7 +88,7 @@ const buildArticleId = (item: RawRssItem, source: FeedSource, index: number): st
 const fetchXml = async (url: string): Promise<string> => {
   if (Platform.OS !== 'web') {
     const res = await fetch(url, {
-      headers: { 'User-Agent': 'StudyFlow/1.0 RSS Reader' },
+      headers: { 'User-Agent': 'Nexara/1.0 RSS Reader' },
       signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) throw new Error(`Failed: ${res.status}`);

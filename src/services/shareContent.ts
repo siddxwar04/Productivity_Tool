@@ -1,9 +1,9 @@
-import { Platform, Share } from 'react-native';
+﻿import { Platform, Share } from 'react-native';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 
 async function dataUriToFile(uri: string): Promise<string> {
-  const path = `${FileSystem.cacheDirectory}studyflow-share-${Date.now()}.png`;
+  const path = `${FileSystem.cacheDirectory}nexara-share-${Date.now()}.png`;
   const base64 = uri.includes(',') ? uri.split(',')[1] : uri;
   await FileSystem.writeAsStringAsync(path, base64, {
     encoding: FileSystem.EncodingType.Base64,
@@ -16,17 +16,17 @@ async function shareOnWeb(message: string, imageUri?: string) {
     try {
       if (imageUri?.startsWith('data:')) {
         const blob = await fetch(imageUri).then((r) => r.blob());
-        const file = new File([blob], 'studyflow-achievements.png', { type: 'image/png' });
+        const file = new File([blob], 'nexara-achievements.png', { type: 'image/png' });
         if (!navigator.canShare || navigator.canShare({ files: [file] })) {
           await navigator.share({
             files: [file],
             text: message,
-            title: 'StudyFlow achievements',
+            title: 'Nexara achievements',
           });
           return;
         }
       }
-      await navigator.share({ text: message, title: 'StudyFlow achievements' });
+      await navigator.share({ text: message, title: 'Nexara achievements' });
       return;
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;

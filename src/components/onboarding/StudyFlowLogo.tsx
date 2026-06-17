@@ -1,11 +1,11 @@
 import React from 'react';
 import Svg, { Defs, LinearGradient, Stop, Path, Rect } from 'react-native-svg';
 
-interface StudyFlowLogoProps {
+interface NexaraLogoProps {
   size?: number;
 }
 
-export function StudyFlowLogo({ size = 72 }: StudyFlowLogoProps) {
+export function NexaraLogo({ size = 72 }: NexaraLogoProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 72 72" fill="none">
       <Defs>

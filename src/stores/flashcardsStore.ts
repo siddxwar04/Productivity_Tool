@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Flashcard, FlashcardDeck } from '../types';
@@ -257,6 +257,6 @@ export const useFlashcardsStore = create<FlashcardsState>()(
       resetFlashcards: () =>
         set({ decks: seedDecks, cards: seedCards, gamification: DEFAULT_GAMIFICATION }),
     }),
-    { name: 'studyflow-flashcards', storage: createJSONStorage(() => AsyncStorage) },
+    { name: 'nexara-flashcards', storage: createJSONStorage(() => AsyncStorage) },
   ),
 );

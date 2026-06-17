@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StudyGroup } from '../types';
@@ -34,6 +34,6 @@ export const useGroupsStore = create<GroupsState>()(
       addGroup: (g) => set((s) => ({ groups: [...s.groups, { ...g, id: generateId() }] })),
       resetGroups: () => set({ groups: seedGroups, joinedIds: [] }),
     }),
-    { name: 'studyflow-groups', storage: createJSONStorage(() => AsyncStorage) },
+    { name: 'nexara-groups', storage: createJSONStorage(() => AsyncStorage) },
   ),
 );

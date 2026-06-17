@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { Button } from '../../components/ui/Button';
@@ -55,7 +55,7 @@ export function PermissionsSlide({ onFinish, onBack }: Props) {
       <Text style={styles.emoji}>🔔</Text>
       <Text style={[styles.title, { color: colors.text }]}>Stay on track</Text>
       <Text style={[styles.sub, { color: colors.textSecondary }]}>
-        Enable notifications so StudyFlow can gently remind you about deadlines, habits, and study sessions — never spammy, always helpful.
+        Enable notifications so Nexara can gently remind you about deadlines, habits, and study sessions — never spammy, always helpful.
       </Text>
 
       <View style={[styles.featureList, { backgroundColor: colors.surface, borderColor: colors.border }]}>

@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Deadline } from '../types';
@@ -61,7 +61,7 @@ export const useDeadlinesStore = create<DeadlinesState>()(
       resetDeadlines: () => set({ deadlines: seedDeadlines }),
     }),
     {
-      name: 'studyflow-deadlines',
+      name: 'nexara-deadlines',
       storage: createJSONStorage(() => AsyncStorage),
     },
   ),

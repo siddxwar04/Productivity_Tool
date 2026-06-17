@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppearanceMode, AppSettings } from '../types';
@@ -32,7 +32,7 @@ export const useSettingsStore = create<SettingsState>()(
       resetSettings: () => set({ ...defaultSettings }),
     }),
     {
-      name: 'studyflow-settings',
+      name: 'nexara-settings',
       storage: createJSONStorage(() => AsyncStorage),
     },
   ),

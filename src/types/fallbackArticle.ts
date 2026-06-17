@@ -1,4 +1,4 @@
-import { Article, ArticleCategory } from './article';
+﻿import { Article, ArticleCategory } from './article';
 
 export type FallbackArticleCategory = Exclude<ArticleCategory, 'all'>;
 
@@ -21,7 +21,7 @@ export function fallbackToArticle(fallback: FallbackArticle): Article {
     url: fallback.articleUrl,
     imageUrl: fallback.imageUrl,
     publishedAt: fallback.publishedDate,
-    source: `StudyFlow · ${fallback.readTime} min read`,
+    source: `Nexara · ${fallback.readTime} min read`,
     category: fallback.category,
   };
 }

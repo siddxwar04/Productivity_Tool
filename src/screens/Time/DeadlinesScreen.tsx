@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, { useMemo, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTheme } from '../../theme/ThemeContext';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { ScreenHeader } from '../../components/ui/ScreenHeader';
@@ -12,7 +12,78 @@ import { StudyStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'Deadlines'>;
 
-const PRIORITY_COLOR = { high: '#EF4444', medium: '#F59E0B', low: '#10B981' };
+const PRIORITY_CONFIG = {
+  high: { color: '#EF4444', label: 'HIGH', bg: '#EF444418' },
+  medium: { color: '#F59E0B', label: 'MED', bg: '#F59E0B18' },
+  low: { color: '#10B981', label: 'LOW', bg: '#10B98118' },
+} as const;
+
+function DeadlineRow({
+  deadline,
+  onToggle,
+  onDelete,
+}: {
+  deadline: { id: string; title: string; dueAt: string; priority: 'high' | 'medium' | 'low'; completed: boolean };
+  onToggle: () => void;
+  onDelete: () => void;
+}) {
+  const { colors } = useTheme();
+  const scale = useRef(new Animated.Value(1)).current;
+  const cfg = PRIORITY_CONFIG[deadline.priority];
+
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.spring(scale, { toValue: 0.97, useNativeDriver: true, friction: 8 }),
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true, friction: 6 }),
+    ]).start(onToggle);
+  };
+
+  return (
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <TouchableOpacity
+        style={[
+          styles.row,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            opacity: deadline.completed ? 0.55 : 1,
+          },
+        ]}
+        onPress={handlePress}
+        onLongPress={onDelete}
+        activeOpacity={1}
+      >
+        <Ionicons
+          name={deadline.completed ? 'checkmark-circle' : 'ellipse-outline'}
+          size={24}
+          color={deadline.completed ? colors.success : colors.textMuted}
+        />
+        <View style={styles.info}>
+          <Text
+            style={[
+              styles.title,
+              {
+                color: colors.text,
+                textDecorationLine: deadline.completed ? 'line-through' : 'none',
+              },
+            ]}
+          >
+            {deadline.title}
+          </Text>
+          <View style={styles.metaRow}>
+            <Ionicons name="time-outline" size={12} color={colors.textMuted} />
+            <Text style={[styles.due, { color: colors.textSecondary }]}>
+              {formatCountdown(deadline.dueAt)}
+            </Text>
+          </View>
+        </View>
+        <View style={[styles.priorityTag, { backgroundColor: cfg.bg }]}>
+          <Text style={[styles.priorityText, { color: cfg.color }]}>{cfg.label}</Text>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
 
 export function DeadlinesScreen({ navigation }: Props) {
   const { colors } = useTheme();
@@ -24,7 +95,9 @@ export function DeadlinesScreen({ navigation }: Props) {
   const filtered = useMemo(
     () =>
       deadlines
-        .filter((d) => filter === 'all' || (filter === 'active' ? !d.completed : d.completed))
+        .filter((d) =>
+          filter === 'all' ? true : filter === 'active' ? !d.completed : d.completed,
+        )
         .sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime()),
     [deadlines, filter],
   );
@@ -32,35 +105,67 @@ export function DeadlinesScreen({ navigation }: Props) {
   return (
     <ScreenWrapper>
       <ScreenHeader title="Deadlines" onBack={() => navigation.goBack()} />
-      <Button title="+ Add assignment" onPress={() => navigation.navigate('AddTask')} style={styles.addBtn} />
+
+      <Button
+        title="+ Add assignment"
+        onPress={() => navigation.navigate('AddTask')}
+        style={styles.addBtn}
+      />
+
       <View style={styles.filters}>
         {(['active', 'done', 'all'] as const).map((f) => (
           <TouchableOpacity
             key={f}
             onPress={() => setFilter(f)}
-            style={[styles.chip, { backgroundColor: filter === f ? colors.primary : colors.surfaceSecondary }]}
+            style={[
+              styles.chip,
+              {
+                backgroundColor: filter === f ? colors.primary : colors.surfaceSecondary,
+                borderColor: filter === f ? colors.primary : colors.border,
+                borderWidth: 1,
+              },
+            ]}
           >
-            <Text style={{ color: filter === f ? '#FFF' : colors.text, fontWeight: '600', textTransform: 'capitalize' }}>{f}</Text>
+            <Text
+              style={[
+                styles.chipText,
+                { color: filter === f ? '#FFF' : colors.text },
+              ]}
+            >
+              {f.charAt(0).toUpperCase() + f.slice(1)}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
-      {filtered.map((d) => (
-        <TouchableOpacity
-          key={d.id}
-          style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border, opacity: d.completed ? 0.6 : 1 }]}
-          onPress={() => toggleComplete(d.id)}
-          onLongPress={() => deleteDeadline(d.id)}
-        >
-          <View style={[styles.dot, { backgroundColor: PRIORITY_COLOR[d.priority] }]} />
-          <View style={styles.info}>
-            <Text style={[styles.title, { color: colors.text, textDecorationLine: d.completed ? 'line-through' : 'none' }]}>{d.title}</Text>
-            <Text style={[styles.due, { color: colors.textSecondary }]}>{formatCountdown(d.dueAt)}</Text>
+
+      {filtered.length === 0 ? (
+        <View style={styles.empty}>
+          <View style={[styles.emptyIcon, { backgroundColor: `${colors.primary}15` }]}>
+            <Ionicons name="checkmark-done-outline" size={32} color={colors.primary} />
           </View>
-          <Ionicons name={d.completed ? 'checkmark-circle' : 'ellipse-outline'} size={24} color={d.completed ? colors.success : colors.textMuted} />
-        </TouchableOpacity>
-      ))}
-      {filtered.length === 0 && (
-        <Text style={[styles.empty, { color: colors.textSecondary }]}>No assignments yet</Text>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>
+            {filter === 'done' ? 'Nothing completed yet' : 'All clear!'}
+          </Text>
+          <Text style={[styles.emptySub, { color: colors.textSecondary }]}>
+            {filter === 'active' ? 'No pending assignments.' : 'Nothing here yet.'}
+          </Text>
+        </View>
+      ) : (
+        filtered.map((d) => (
+          <DeadlineRow
+            key={d.id}
+            deadline={d}
+            onToggle={() => toggleComplete(d.id)}
+            onDelete={() => deleteDeadline(d.id)}
+          />
+        ))
+      )}
+
+      {deadlines.length > 0 && (
+        <View style={styles.deleteHint}>
+          <Ionicons name="hand-left-outline" size={12} color={colors.textMuted} />
+          <Text style={[styles.deleteHintText, { color: colors.textMuted }]}>Hold to delete</Text>
+        </View>
       )}
     </ScreenWrapper>
   );
@@ -69,11 +174,31 @@ export function DeadlinesScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   addBtn: { marginBottom: 16 },
   filters: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8 },
-  row: { flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 12, borderWidth: 1, marginBottom: 10 },
-  dot: { width: 8, height: 8, borderRadius: 4, marginRight: 12 },
+  chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
+  chipText: { fontSize: 13, fontWeight: '600' },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 10,
+    gap: 12,
+  },
   info: { flex: 1 },
-  title: { fontSize: 16, fontWeight: '600' },
-  due: { fontSize: 13, marginTop: 2 },
-  empty: { textAlign: 'center', marginTop: 40 },
+  title: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  due: { fontSize: 13 },
+  priorityTag: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  priorityText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.5 },
+  empty: { alignItems: 'center', paddingVertical: 40 },
+  emptyIcon: { width: 64, height: 64, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  emptyTitle: { fontSize: 17, fontWeight: '700', marginBottom: 6 },
+  emptySub: { fontSize: 14 },
+  deleteHint: { flexDirection: 'row', alignItems: 'center', gap: 5, justifyContent: 'center', marginTop: 8 },
+  deleteHintText: { fontSize: 11 },
 });

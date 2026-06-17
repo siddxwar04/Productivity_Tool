@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SleepEntry } from '../types';
@@ -33,6 +33,6 @@ export const useSleepStore = create<SleepState>()(
       },
       resetSleep: () => set({ entries: [] }),
     }),
-    { name: 'studyflow-sleep', storage: createJSONStorage(() => AsyncStorage) },
+    { name: 'nexara-sleep', storage: createJSONStorage(() => AsyncStorage) },
   ),
 );

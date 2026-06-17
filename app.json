@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "StudyFlow",
-    "slug": "studyflow",
+    "name": "Nexara",
+    "slug": "nexara",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -35,7 +35,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow StudyFlow to access your photos for your profile avatar."
+          "photosPermission": "Allow Nexara to access your photos for your profile avatar."
         }
       ]
     ]

@@ -23,7 +23,7 @@ interface Props {
 }
 
 function GradientTitle() {
-  const title = 'StudyFlow';
+  const title = 'Nexara';
 
   if (Platform.OS === 'web') {
     return (

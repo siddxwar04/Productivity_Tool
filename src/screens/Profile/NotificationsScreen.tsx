@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '../../theme/ThemeContext';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
+import { ScreenHeader } from '../../components/ui/ScreenHeader';
 import { Card } from '../../components/ui/Card';
 import { ToggleRow } from '../../components/ui/ToggleRow';
 import { TimePickerRow } from '../../components/ui/TimePickerRow';
@@ -31,31 +32,27 @@ export function NotificationsScreen({ navigation }: Props) {
 
   return (
     <ScreenWrapper>
-      <Text style={[styles.title, { color: colors.text }]} onPress={() => navigation.goBack()}>
-        ← Notifications
-      </Text>
+      <ScreenHeader title="Notifications" onBack={() => navigation.goBack()} />
 
       <Card style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Deadline reminders</Text>
         <ToggleRow
-          label="1 week before"
+          label="1 week before deadline"
           value={deadlineReminders.oneWeek}
           onValueChange={(oneWeek) => updateDeadlineReminders({ oneWeek })}
         />
         <ToggleRow
-          label="1 day before"
+          label="1 day before deadline"
           value={deadlineReminders.oneDay}
           onValueChange={(oneDay) => updateDeadlineReminders({ oneDay })}
         />
         <ToggleRow
-          label="1 hour before"
+          label="1 hour before deadline"
           value={deadlineReminders.oneHour}
           onValueChange={(oneHour) => updateDeadlineReminders({ oneHour })}
         />
       </Card>
 
       <Card style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Daily reminders</Text>
         <ToggleRow
           label="Habit daily reminder"
           value={habitDailyReminder.enabled}
@@ -126,7 +123,6 @@ export function NotificationsScreen({ navigation }: Props) {
       </Card>
 
       <Card style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Study sessions</Text>
         <ToggleRow
           label="Pomodoro session end chime"
           value={pomodoroChime}
@@ -140,7 +136,6 @@ export function NotificationsScreen({ navigation }: Props) {
       </Card>
 
       <Card style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Social & rewards</Text>
         <ToggleRow
           label="Group chat messages"
           value={groupChat}
@@ -163,7 +158,5 @@ export function NotificationsScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 22, fontWeight: '700', marginBottom: 20 },
   section: { marginBottom: 16 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 4 },
 });

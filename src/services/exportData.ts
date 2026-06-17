@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+﻿import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { useUserProfileStore } from '../stores/userProfileStore';
@@ -21,11 +21,11 @@ import { usePeersStore } from '../stores/peersStore';
 import { useArticleStore } from '../stores/articleStore';
 
 const STORAGE_KEYS = [
-  'studyflow-user-profile', 'studyflow-settings', 'studyflow-notifications',
-  'studyflow-habits', 'studyflow-deadlines', 'studyflow-streak', 'studyflow-analytics',
-  'studyflow-rewards', 'studyflow-notes', 'studyflow-flashcards', 'studyflow-grades',
-  'studyflow-planner', 'studyflow-mood', 'studyflow-sleep', 'studyflow-resources',
-  'studyflow-groups', 'studyflow-peers', 'article-store',
+  'nexara-user-profile', 'nexara-settings', 'nexara-notifications',
+  'nexara-habits', 'nexara-deadlines', 'nexara-streak', 'nexara-analytics',
+  'nexara-rewards', 'nexara-notes', 'nexara-flashcards', 'nexara-grades',
+  'nexara-planner', 'nexara-mood', 'nexara-sleep', 'nexara-resources',
+  'nexara-groups', 'nexara-peers', 'article-store',
 ];
 
 export async function exportAllData(): Promise<void> {
@@ -51,11 +51,11 @@ export async function exportAllData(): Promise<void> {
   };
 
   const json = JSON.stringify(data, null, 2);
-  const path = `${FileSystem.cacheDirectory ?? FileSystem.documentDirectory}studyflow-export.json`;
+  const path = `${FileSystem.cacheDirectory ?? FileSystem.documentDirectory}nexara-export.json`;
   await FileSystem.writeAsStringAsync(path, json);
 
   if (await Sharing.isAvailableAsync()) {
-    await Sharing.shareAsync(path, { mimeType: 'application/json', dialogTitle: 'Export StudyFlow Data' });
+    await Sharing.shareAsync(path, { mimeType: 'application/json', dialogTitle: 'Export Nexara Data' });
   }
 }
 

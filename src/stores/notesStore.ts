@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Note } from '../types';
@@ -35,6 +35,6 @@ export const useNotesStore = create<NotesState>()(
       getNote: (id) => get().notes.find((n) => n.id === id),
       resetNotes: () => set({ notes: [] }),
     }),
-    { name: 'studyflow-notes', storage: createJSONStorage(() => AsyncStorage) },
+    { name: 'nexara-notes', storage: createJSONStorage(() => AsyncStorage) },
   ),
 );

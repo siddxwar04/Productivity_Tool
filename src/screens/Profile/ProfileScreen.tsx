@@ -17,6 +17,7 @@ import { useRewardsStore } from '../../stores/rewardsStore';
 import { getInitials } from '../../utils/helpers';
 import { getLevelTitle, MILESTONES } from '../../constants/milestones';
 import { shareImage, shareText } from '../../services/shareContent';
+import { resetAppData } from '../../utils/devReset';
 import { ProfileStackParamList } from '../../navigation/types';
 
 type Props = {
@@ -67,7 +68,7 @@ export function ProfileScreen({ navigation }: Props) {
   const confirmReplayOnboarding = () => {
     Alert.alert(
       'Show welcome screen',
-      'You will see the StudyFlow logo and onboarding again. Your saved data stays intact.',
+      'You will see the Nexara logo and onboarding again. Your saved data stays intact.',
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Continue', onPress: () => replayOnboarding() },
@@ -76,7 +77,7 @@ export function ProfileScreen({ navigation }: Props) {
   };
 
   const shareAchievements = async () => {
-    const message = `My StudyFlow progress — Level ${level} ${getLevelTitle(level)}! ${totalStudyHours}h studied · ${totalPomodoros} pomodoros · ${longestStreak}d streak`;
+    const message = `My Nexara progress — Level ${level} ${getLevelTitle(level)}! ${totalStudyHours}h studied · ${totalPomodoros} pomodoros · ${longestStreak}d streak`;
     try {
       const uri = await shotRef.current?.capture?.();
       if (uri) {
@@ -192,13 +193,42 @@ export function ProfileScreen({ navigation }: Props) {
 
       <ViewShot ref={shotRef} options={{ format: 'png', quality: 1 }} style={styles.hiddenShot}>
         <View style={[styles.shotContent, { backgroundColor: colors.primary }]}>
-          <Text style={styles.shotTitle}>StudyFlow</Text>
+          <Text style={styles.shotTitle}>Nexara</Text>
           <Text style={styles.shotLevel}>Level {level} {getLevelTitle(level)}</Text>
           <Text style={styles.shotStats}>
             {totalStudyHours}h studied · {totalPomodoros} pomodoros · {longestStreak}d streak
           </Text>
         </View>
       </ViewShot>
+
+      {__DEV__ && (
+        <TouchableOpacity
+          onPress={() => {
+            Alert.alert(
+              'Reset app data?',
+              'This clears all local data and restarts onboarding. Dev only — this will not appear in production.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Reset', style: 'destructive', onPress: resetAppData },
+              ],
+            );
+          }}
+          style={{
+            marginTop: 32,
+            marginHorizontal: 16,
+            padding: 14,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: '#EF4444',
+            backgroundColor: 'rgba(239,68,68,0.1)',
+            alignItems: 'center',
+          }}
+        >
+          <Text style={{ color: '#EF4444', fontWeight: '600', fontSize: 14 }}>
+            🔧 Reset app data (dev only)
+          </Text>
+        </TouchableOpacity>
+      )}
     </ScreenWrapper>
   );
 }

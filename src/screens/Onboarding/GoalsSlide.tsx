@@ -34,8 +34,8 @@ export function GoalsSlide({ goals, onGoalsChange, onContinue, onBack }: Props) 
           <Text style={[styles.sliderValue, { color: colors.primary }]}>{goals.targetGpa.toFixed(1)}</Text>
         </View>
         <Slider
-          minimumValue={2.0}
-          maximumValue={4.0}
+          minimumValue={5.0}
+          maximumValue={10.0}
           step={0.1}
           value={goals.targetGpa}
           onValueChange={(v) => onGoalsChange({ ...goals, targetGpa: v })}

@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system/legacy';
+﻿import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { useDeadlinesStore } from '../stores/deadlinesStore';
 
@@ -7,7 +7,7 @@ export async function exportCalendarIcs(): Promise<void> {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//StudyFlow//EN',
+    'PRODID:-//Nexara//EN',
   ];
 
   for (const d of deadlines) {
@@ -15,7 +15,7 @@ export async function exportCalendarIcs(): Promise<void> {
     const stamp = due.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     lines.push(
       'BEGIN:VEVENT',
-      `UID:${d.id}@studyflow.app`,
+      `UID:${d.id}@Nexara.app`,
       `DTSTART:${stamp}`,
       `DTEND:${stamp}`,
       `SUMMARY:${d.title}`,
@@ -25,7 +25,7 @@ export async function exportCalendarIcs(): Promise<void> {
   }
 
   lines.push('END:VCALENDAR');
-  const path = `${FileSystem.cacheDirectory ?? FileSystem.documentDirectory}studyflow.ics`;
+  const path = `${FileSystem.cacheDirectory ?? FileSystem.documentDirectory}Nexara.ics`;
   await FileSystem.writeAsStringAsync(path, lines.join('\r\n'));
   if (await Sharing.isAvailableAsync()) {
     await Sharing.shareAsync(path, { mimeType: 'text/calendar', dialogTitle: 'Export to Calendar' });

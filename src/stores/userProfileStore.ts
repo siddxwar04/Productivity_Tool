@@ -1,11 +1,11 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Subject, UserGoals, UserProfile } from '../types';
 import { getXpForLevel, getXpToNextLevel } from '../constants/milestones';
 
 const defaultGoals: UserGoals = {
-  targetGpa: 3.5,
+  targetGpa: 8.0,
   studyHoursPerDay: 2,
   bedtimeHour: 23,
 };
@@ -56,6 +56,17 @@ type PersistedProfile = Pick<
   | 'xp'
 >;
 
+/** Convert targetGpa from 4-point scale to 10-point scale. */
+function fixGpaScale(profile: PersistedProfile): PersistedProfile {
+  if (profile.goals?.targetGpa !== undefined && profile.goals.targetGpa <= 4.0) {
+    return {
+      ...profile,
+      goals: { ...profile.goals, targetGpa: Math.round(profile.goals.targetGpa * 2.5 * 10) / 10 },
+    };
+  }
+  return profile;
+}
+
 /** Fix onboarding bug that set name to first word of course (e.g. "computer"). */
 function fixLegacyProfile(profile: PersistedProfile): PersistedProfile {
   const courseFirst = profile.course.trim().split(/\s+/)[0]?.toLowerCase() ?? '';
@@ -100,10 +111,10 @@ export const useUserProfileStore = create<UserProfileState>()(
       replayOnboarding: () => {
         set({ onboardingComplete: false });
         // Ensure persisted storage updates immediately (web localStorage / native AsyncStorage)
-        void AsyncStorage.getItem('studyflow-user-profile').then((raw) => {
+        void AsyncStorage.getItem('nexara-user-profile').then((raw) => {
           if (!raw) {
             void AsyncStorage.setItem(
-              'studyflow-user-profile',
+              'nexara-user-profile',
               JSON.stringify({ state: { ...initialProfile, onboardingComplete: false }, version: 2 }),
             );
             return;
@@ -112,7 +123,7 @@ export const useUserProfileStore = create<UserProfileState>()(
             const parsed = JSON.parse(raw) as { state?: PersistedProfile; version?: number };
             const state = { ...(parsed.state ?? {}), onboardingComplete: false };
             void AsyncStorage.setItem(
-              'studyflow-user-profile',
+              'nexara-user-profile',
               JSON.stringify({ ...parsed, state, version: parsed.version ?? 2 }),
             );
           } catch {
@@ -145,29 +156,26 @@ export const useUserProfileStore = create<UserProfileState>()(
       },
     }),
     {
-      name: 'studyflow-user-profile',
-      version: 2,
+      name: 'nexara-user-profile',
+      version: 3,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persisted, version) => {
         const base = (persisted ?? {}) as PersistedProfile;
-        if (version < 2) {
-          return fixLegacyProfile({
-            ...initialProfile,
-            ...base,
-          });
-        }
-        return fixLegacyProfile(base);
+        const withLegacy = version < 2
+          ? fixLegacyProfile({ ...initialProfile, ...base })
+          : fixLegacyProfile(base);
+        return version < 3 ? fixGpaScale(withLegacy) : withLegacy;
       },
       merge: (persisted, current) => ({
         ...current,
-        ...fixLegacyProfile({
+        ...fixGpaScale(fixLegacyProfile({
           ...initialProfile,
           ...(persisted as PersistedProfile),
-        }),
+        })),
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
-          const fixed = fixLegacyProfile({
+          const fixed = fixGpaScale(fixLegacyProfile({
             displayName: state.displayName,
             university: state.university,
             course: state.course,
@@ -178,7 +186,7 @@ export const useUserProfileStore = create<UserProfileState>()(
             onboardingComplete: state.onboardingComplete,
             level: state.level,
             xp: state.xp,
-          });
+          }));
           if (
             fixed.displayName !== state.displayName
             || fixed.university !== state.university
@@ -187,6 +195,9 @@ export const useUserProfileStore = create<UserProfileState>()(
             state.setDisplayName(fixed.displayName);
             state.setUniversity(fixed.university);
             state.setCourse(fixed.course);
+          }
+          if (fixed.goals.targetGpa !== state.goals.targetGpa) {
+            state.setGoals(fixed.goals);
           }
         }
         state?.setHydrated(true);
