@@ -56,7 +56,7 @@ export function OnboardingFlow() {
   const handleFinish = () => {
     const validSubjects = subjects.filter((s) => s.name.trim());
     completeOnboarding({
-      university,
+      university: university.trim(),
       course,
       subjectCount: validSubjects.length,
       subjects: validSubjects,
@@ -65,6 +65,17 @@ export function OnboardingFlow() {
       onboardingComplete: true,
     });
     triggerReward('gpa_goal_set');
+  };
+
+  const handleSkipUniversity = () => {
+    setUniversity('');
+    setStep(2);
+  };
+
+  const handleSkipSubjects = () => {
+    setSubjects([]);
+    setSubjectCount(0);
+    setStep(3);
   };
 
   if (step === 0) {
@@ -98,6 +109,7 @@ export function OnboardingFlow() {
             onSubjectCountChange={handleSubjectCountChange}
             onContinue={() => setStep(2)}
             onBack={() => setStep(0)}
+            onSkipUniversity={handleSkipUniversity}
           />
         )}
         {step === 2 && (
@@ -107,6 +119,7 @@ export function OnboardingFlow() {
             onSubjectsChange={setSubjects}
             onContinue={() => setStep(3)}
             onBack={() => setStep(1)}
+            onSkipSubjects={handleSkipSubjects}
           />
         )}
         {step === 3 && (

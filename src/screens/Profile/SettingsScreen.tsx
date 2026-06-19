@@ -11,7 +11,9 @@ import { ScreenHeader } from '../../components/ui/ScreenHeader';
 import { Card } from '../../components/ui/Card';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useUserProfileStore } from '../../stores/userProfileStore';
-import { AppearanceMode } from '../../types';
+import { AppearanceMode, Subject } from '../../types';
+import { SUBJECT_COLORS } from '../../constants/milestones';
+import { generateId } from '../../utils/helpers';
 import { exportAllData, clearAllData } from '../../services/exportData';
 import { exportCalendarIcs } from '../../services/calendarService';
 import { signInWithGoogle } from '../../services/supabaseClient';
@@ -59,15 +61,22 @@ export function SettingsScreen({ navigation }: Props) {
   const displayName = useUserProfileStore((s) => s.displayName);
   const university = useUserProfileStore((s) => s.university);
   const course = useUserProfileStore((s) => s.course);
+  const subjects = useUserProfileStore((s) => s.subjects);
   const setDisplayName = useUserProfileStore((s) => s.setDisplayName);
   const setUniversity = useUserProfileStore((s) => s.setUniversity);
   const setCourse = useUserProfileStore((s) => s.setCourse);
+  const setSubjects = useUserProfileStore((s) => s.setSubjects);
   const replayOnboarding = useUserProfileStore((s) => s.replayOnboarding);
 
   const [newApp, setNewApp] = useState('');
   const [nameEdit, setNameEdit] = useState(displayName);
   const [uniEdit, setUniEdit] = useState(university);
   const [courseEdit, setCourseEdit] = useState(course);
+  const [subjectsEdit, setSubjectsEdit] = useState<Subject[]>(
+    subjects.length > 0
+      ? subjects
+      : [{ id: generateId(), name: '', color: SUBJECT_COLORS[0] }],
+  );
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const version = Constants.expoConfig?.version ?? '1.0.0';
 
@@ -75,7 +84,20 @@ export function SettingsScreen({ navigation }: Props) {
     setDisplayName(nameEdit.trim() || displayName);
     setUniversity(uniEdit.trim());
     setCourse(courseEdit.trim());
+    setSubjects(subjectsEdit.filter((s) => s.name.trim()));
     Alert.alert('Saved', 'Your profile has been updated.');
+  };
+
+  const updateSubjectName = (id: string, name: string) => {
+    setSubjectsEdit((prev) => prev.map((s) => (s.id === id ? { ...s, name } : s)));
+  };
+
+  const addSubjectRow = () => {
+    if (subjectsEdit.length >= 8) return;
+    setSubjectsEdit((prev) => [
+      ...prev,
+      { id: generateId(), name: '', color: SUBJECT_COLORS[prev.length % SUBJECT_COLORS.length] },
+    ]);
   };
 
   const confirmReplayOnboarding = () => {
@@ -220,8 +242,26 @@ export function SettingsScreen({ navigation }: Props) {
         <Text style={[styles.label, { color: colors.textSecondary, marginTop: 12 }]}>University / College</Text>
         <TextInput style={inputStyle('uni')} placeholder="e.g. Presidency University" placeholderTextColor={colors.textMuted} value={uniEdit} onChangeText={setUniEdit} onFocus={() => setFocusedField('uni')} onBlur={() => setFocusedField(null)} />
         <Text style={[styles.label, { color: colors.textSecondary, marginTop: 12 }]}>Course / Program</Text>
-        <TextInput style={[inputStyle('course'), { marginBottom: 16 }]} placeholder="e.g. Computer Science" placeholderTextColor={colors.textMuted} value={courseEdit} onChangeText={setCourseEdit} onFocus={() => setFocusedField('course')} onBlur={() => setFocusedField(null)} />
-        <TouchableOpacity onPress={saveProfile} style={[styles.saveProfileBtn, { backgroundColor: colors.primary }]}>
+        <TextInput style={inputStyle('course')} placeholder="e.g. Computer Science" placeholderTextColor={colors.textMuted} value={courseEdit} onChangeText={setCourseEdit} onFocus={() => setFocusedField('course')} onBlur={() => setFocusedField(null)} />
+        <Text style={[styles.label, { color: colors.textSecondary, marginTop: 12 }]}>Subjects</Text>
+        {subjectsEdit.map((subject, index) => (
+          <TextInput
+            key={subject.id}
+            style={[inputStyle(`subject-${subject.id}`), { marginBottom: 8 }]}
+            placeholder={`Subject ${index + 1}`}
+            placeholderTextColor={colors.textMuted}
+            value={subject.name}
+            onChangeText={(name) => updateSubjectName(subject.id, name)}
+            onFocus={() => setFocusedField(`subject-${subject.id}`)}
+            onBlur={() => setFocusedField(null)}
+          />
+        ))}
+        {subjectsEdit.length < 8 && (
+          <TouchableOpacity onPress={addSubjectRow} style={{ marginBottom: 12 }}>
+            <Text style={{ color: colors.primary, fontSize: 14, fontWeight: '600' }}>+ Add subject</Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity onPress={saveProfile} style={[styles.saveProfileBtn, { backgroundColor: colors.primary, marginBottom: 4 }]}>
           <Ionicons name="checkmark-circle-outline" size={18} color="#FFF" />
           <Text style={styles.saveProfileText}>Save profile</Text>
         </TouchableOpacity>

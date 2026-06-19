@@ -12,9 +12,10 @@ interface Props {
   onSubjectsChange: (subjects: Subject[]) => void;
   onContinue: () => void;
   onBack: () => void;
+  onSkipSubjects: () => void;
 }
 
-export function SubjectsSlide({ subjects, maxSubjects, onSubjectsChange, onContinue, onBack }: Props) {
+export function SubjectsSlide({ subjects, maxSubjects, onSubjectsChange, onContinue, onBack, onSkipSubjects }: Props) {
   const { colors } = useTheme();
 
   const addSubject = () => {
@@ -82,6 +83,10 @@ export function SubjectsSlide({ subjects, maxSubjects, onSubjectsChange, onConti
         <Button title="Back" onPress={onBack} variant="ghost" style={styles.half} />
         <Button title="Continue" onPress={onContinue} style={styles.half} disabled={validCount === 0} />
       </View>
+
+      <TouchableOpacity onPress={onSkipSubjects} style={styles.skipBtn} activeOpacity={0.7}>
+        <Text style={[styles.skipText, { color: colors.textSecondary }]}>Add later</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -111,4 +116,6 @@ const styles = StyleSheet.create({
   },
   actions: { flexDirection: 'row', gap: 12, paddingTop: 12 },
   half: { flex: 1 },
+  skipBtn: { alignItems: 'center', paddingVertical: 14, marginTop: 4 },
+  skipText: { fontSize: 14, fontWeight: '500' },
 });

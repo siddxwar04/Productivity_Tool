@@ -102,12 +102,17 @@ export const useUserProfileStore = create<UserProfileState>()(
         set((s) => ({ subjects: s.subjects.filter((sub) => sub.id !== id) })),
       setGoals: (goals) => set({ goals }),
       setAvatarUri: (avatarUri) => set({ avatarUri }),
-      completeOnboarding: (data) =>
+      completeOnboarding: (data) => {
+        const validSubjects = (data.subjects ?? []).filter((s) => s.name.trim());
         set({
           ...data,
           onboardingComplete: true,
           displayName: data.displayName?.trim() || 'Student',
-        }),
+          university: data.university?.trim() ?? '',
+          subjects: validSubjects,
+          subjectCount: validSubjects.length,
+        });
+      },
       replayOnboarding: () => {
         set({ onboardingComplete: false });
         // Ensure persisted storage updates immediately (web localStorage / native AsyncStorage)

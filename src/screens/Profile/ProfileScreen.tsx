@@ -101,8 +101,32 @@ export function ProfileScreen({ navigation }: Props) {
     { label: 'Subjects', value: String(subjects.length) },
   ];
 
+  const hasUniversity = university.trim().length > 0;
+  const hasSubjects = subjects.some((s) => s.name.trim().length > 0);
+  const showProfileCompletionBanner = !hasUniversity || !hasSubjects;
+
   return (
     <ScreenWrapper>
+      {showProfileCompletionBanner && (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Settings')}
+          activeOpacity={0.7}
+          style={[
+            styles.completionBanner,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              borderLeftColor: colors.primary,
+            },
+          ]}
+        >
+          <Text style={[styles.completionBannerText, { color: colors.text }]}>
+            📚 Complete your profile — Add your college & subjects
+          </Text>
+          <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+        </TouchableOpacity>
+      )}
+
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => navigation.navigate('Settings')} style={styles.iconBtn}>
           <Ionicons name="settings-outline" size={24} color={colors.text} />
@@ -234,6 +258,18 @@ export function ProfileScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
+  completionBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderLeftWidth: 4,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    marginBottom: 16,
+    gap: 8,
+  },
+  completionBannerText: { flex: 1, fontSize: 14, fontWeight: '500', lineHeight: 20 },
   topBar: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginBottom: 8, marginTop: -8 },
   iconBtn: { padding: 8 },
   profileHeader: { alignItems: 'center', marginBottom: 24 },
