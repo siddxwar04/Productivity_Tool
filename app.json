@@ -9,7 +9,9 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       }
     },
     "android": {
@@ -37,7 +39,8 @@
         {
           "photosPermission": "Allow Nexara to access your photos for your profile avatar."
         }
-      ]
+      ],
+      "expo-font"
     ]
   }
 }

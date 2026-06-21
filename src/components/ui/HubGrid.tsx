@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme/ThemeContext';
+import { HEADING } from '../../utils/typography';
 
 export interface HubItem {
   id: string;
@@ -55,6 +56,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
   },
-  title: { fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  title: { fontSize: 16, fontWeight: '700', marginBottom: 4, ...HEADING },
   sub: { fontSize: 12, lineHeight: 16 },
 });

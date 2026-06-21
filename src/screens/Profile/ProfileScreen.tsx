@@ -19,6 +19,7 @@ import { getLevelTitle, MILESTONES } from '../../constants/milestones';
 import { shareImage, shareText } from '../../services/shareContent';
 import { resetAppData } from '../../utils/devReset';
 import { ProfileStackParamList } from '../../navigation/types';
+import { SECTION_HEADING } from '../../utils/typography';
 
 type Props = {
   navigation: NativeStackNavigationProp<ProfileStackParamList, 'ProfileMain'>;
@@ -288,7 +289,7 @@ const styles = StyleSheet.create({
   levelBadge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
   levelText: { fontSize: 14, fontWeight: '700' },
   xpText: { fontSize: 13 },
-  sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
+  sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12, ...SECTION_HEADING },
   milestoneGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 24 },
   milestoneItem: {
     width: '22%',

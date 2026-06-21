@@ -11,6 +11,7 @@ import { HabitRing } from '../../components/ui/HabitRing';
 import { useHabitsStore } from '../../stores/habitsStore';
 import { SUBJECT_COLORS } from '../../constants/milestones';
 import { GoalsStackParamList } from '../../navigation/types';
+import * as Haptics from 'expo-haptics';
 
 type Props = NativeStackScreenProps<GoalsStackParamList, 'Habits'>;
 
@@ -87,6 +88,17 @@ export function HabitsScreen({ navigation }: Props) {
     setShowAdd(false);
   };
 
+  const handleHabitToggle = (id: string) => {
+    const habit = habits.find((h) => h.id === id);
+    const willComplete = habit != null
+      && habit.completedToday < habit.targetPerDay
+      && habit.completedToday + 1 >= habit.targetPerDay;
+    toggleHabitProgress(id);
+    if (willComplete) {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  };
+
   return (
     <ScreenWrapper>
       <ScreenHeader title="Habits" onBack={() => navigation.goBack()} />
@@ -94,7 +106,7 @@ export function HabitsScreen({ navigation }: Props) {
       {habits.length > 0 && (
         <View style={styles.rings}>
           {habits.map((h) => (
-            <TouchableOpacity key={h.id} onPress={() => toggleHabitProgress(h.id)} activeOpacity={0.8}>
+            <TouchableOpacity key={h.id} onPress={() => handleHabitToggle(h.id)} activeOpacity={0.8}>
               <HabitRing
                 name={h.name}
                 progress={h.completedToday / h.targetPerDay}
@@ -121,7 +133,7 @@ export function HabitsScreen({ navigation }: Props) {
         <HabitRow
           key={h.id}
           habit={h}
-          onToggle={() => toggleHabitProgress(h.id)}
+          onToggle={() => handleHabitToggle(h.id)}
           onDelete={() => deleteHabit(h.id)}
         />
       ))}

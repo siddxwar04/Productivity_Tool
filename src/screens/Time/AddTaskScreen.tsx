@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StudyStackParamList } from '../../navigation/types';
+import { SECTION_HEADING } from '../../utils/typography';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'AddTask'>;
 
@@ -415,7 +416,7 @@ const styles = StyleSheet.create({
   saveBtnDisabled: { opacity: 0.45 },
   saveText: { color: COLORS.text, fontSize: 16, fontWeight: '700' },
 
-  sectionTitle: { color: COLORS.text, fontSize: 18, fontWeight: '700', marginTop: 32, marginBottom: 12 },
+  sectionTitle: { color: COLORS.text, fontSize: 18, fontWeight: '700', marginTop: 32, marginBottom: 12, ...SECTION_HEADING },
 
   taskCard: {
     backgroundColor: COLORS.card,

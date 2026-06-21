@@ -27,6 +27,7 @@ import { useStreakStore } from '../../stores/streakStore';
 import { MOCK_ACTIVITIES, MOCK_ONLINE_PEERS, avatarColorFor } from '../../data/socialMockData';
 import { SocialTab } from '../../types/social';
 import { MainTabParamList, RootStackParamList, SocialStackParamList } from '../../navigation/types';
+import { SCREEN_TITLE } from '../../utils/typography';
 
 type Props = NativeStackScreenProps<SocialStackParamList, 'SocialHub'>;
 
@@ -42,6 +43,7 @@ const TABS: { id: SocialTab; label: string }[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'groups', label: 'Groups' },
   { id: 'peers', label: 'Peers' },
+  { id: 'leaderboard', label: 'Ranks' },
 ];
 
 function matchesQuery(text: string, query: string): boolean {
@@ -158,6 +160,22 @@ export function SocialHubScreen({ navigation: stackNav }: Props) {
           </View>
         </TouchableOpacity>
       </View>
+
+      <View style={styles.sectionGap} />
+      <TouchableOpacity
+        style={[styles.leaderboardBanner, { backgroundColor: `${colors.warning}18`, borderColor: `${colors.warning}55` }]}
+        activeOpacity={0.85}
+        onPress={() => stackNav.navigate('Leaderboard')}
+      >
+        <Ionicons name="trophy" size={22} color={colors.warning} />
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.bannerTitle, { color: colors.text }]}>Weekly Leaderboard</Text>
+          <Text style={[styles.bannerSub, { color: colors.textSecondary }]}>
+            See how you rank among friends this week
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </TouchableOpacity>
 
       <View style={styles.sectionGap} />
       <StreakCard
@@ -357,6 +375,22 @@ export function SocialHubScreen({ navigation: stackNav }: Props) {
       {activeTab === 'overview' && renderOverview()}
       {activeTab === 'groups' && renderGroupsTab()}
       {activeTab === 'peers' && renderPeersTab()}
+      {activeTab === 'leaderboard' && (
+        <TouchableOpacity
+          style={[styles.leaderboardBanner, { backgroundColor: `${colors.warning}18`, borderColor: `${colors.warning}55`, marginTop: 8 }]}
+          activeOpacity={0.85}
+          onPress={() => stackNav.navigate('Leaderboard')}
+        >
+          <Ionicons name="trophy" size={22} color={colors.warning} />
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.bannerTitle, { color: colors.text }]}>Open Leaderboard</Text>
+            <Text style={[styles.bannerSub, { color: colors.textSecondary }]}>
+              See this week's full rankings
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+        </TouchableOpacity>
+      )}
     </ScreenWrapper>
   );
 }
@@ -376,6 +410,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '800',
     marginBottom: 4,
+    ...SCREEN_TITLE,
   },
   sub: {
     fontSize: 15,
@@ -534,5 +569,21 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 4,
     alignItems: 'flex-start',
+  },
+  leaderboardBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 14,
+  },
+  bannerTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  bannerSub: {
+    fontSize: 12,
   },
 });

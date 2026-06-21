@@ -4,6 +4,7 @@ import Slider from '@react-native-community/slider';
 import { UserGoals } from '../../types';
 import { useTheme } from '../../theme/ThemeContext';
 import { Button } from '../../components/ui/Button';
+import { SCREEN_TITLE, LABEL } from '../../utils/typography';
 
 interface Props {
   goals: UserGoals;
@@ -81,7 +82,7 @@ export function GoalsSlide({ goals, onGoalsChange, onContinue, onBack }: Props) 
 
       <View style={styles.actions}>
         <Button title="Back" onPress={onBack} variant="ghost" style={styles.half} />
-        <Button title="Continue" onPress={onContinue} style={styles.half} />
+        <Button title="Continue" onPress={onContinue} style={styles.half} haptic />
       </View>
     </View>
   );
@@ -89,12 +90,12 @@ export function GoalsSlide({ goals, onGoalsChange, onContinue, onBack }: Props) 
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  title: { fontSize: 26, fontWeight: '700', marginBottom: 8 },
+  title: { fontSize: 26, fontWeight: '700', marginBottom: 8, ...SCREEN_TITLE },
   sub: { fontSize: 15, marginBottom: 24, lineHeight: 22 },
   sliderBlock: { borderWidth: 1, borderRadius: 12, padding: 16, marginBottom: 16 },
   sliderHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  sliderLabel: { fontSize: 16, fontWeight: '600' },
-  sliderValue: { fontSize: 16, fontWeight: '700' },
+  sliderLabel: { fontSize: 16, fontWeight: '600', ...LABEL },
+  sliderValue: { fontSize: 16, fontWeight: '700', ...LABEL },
   actions: { flexDirection: 'row', gap: 12, marginTop: 'auto', paddingTop: 12 },
   half: { flex: 1 },
 });

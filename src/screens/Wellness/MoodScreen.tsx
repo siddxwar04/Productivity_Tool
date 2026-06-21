@@ -14,6 +14,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList, WellnessStackParamList } from '../../navigation/types';
+import { SECTION_HEADING } from '../../utils/typography';
 import { useTheme } from '../../theme/ThemeContext';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { ScreenHeader } from '../../components/ui/ScreenHeader';
@@ -343,6 +344,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     marginBottom: 12,
+    ...SECTION_HEADING,
   },
   trendTitle: {
     marginTop: 24,

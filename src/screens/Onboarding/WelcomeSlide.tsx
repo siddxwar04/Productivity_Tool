@@ -12,6 +12,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
+import { HEADING, LABEL } from '../../utils/typography';
 
 const { width, height } = Dimensions.get('window');
 
@@ -225,7 +227,10 @@ export function WelcomeSlide({ onContinue, currentPage = 0 }: Props) {
             activeOpacity={1}
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
-            onPress={onContinue}
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onContinue();
+            }}
           >
             <LinearGradient
               colors={['#7C6FF0', '#6C5CE7']}
@@ -351,6 +356,7 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
     color: '#FFFFFF',
     textAlign: 'center',
+    ...HEADING,
   },
   taglinePill: {
     backgroundColor: 'rgba(255,255,255,0.06)',
@@ -396,6 +402,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.8,
+    ...LABEL,
   },
   version: {
     fontSize: 11,

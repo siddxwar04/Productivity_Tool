@@ -5,6 +5,7 @@ import { SUBJECT_COLORS } from '../../constants/milestones';
 import { generateId } from '../../utils/helpers';
 import { useTheme } from '../../theme/ThemeContext';
 import { Button } from '../../components/ui/Button';
+import { SCREEN_TITLE } from '../../utils/typography';
 
 interface Props {
   subjects: Subject[];
@@ -81,7 +82,7 @@ export function SubjectsSlide({ subjects, maxSubjects, onSubjectsChange, onConti
 
       <View style={styles.actions}>
         <Button title="Back" onPress={onBack} variant="ghost" style={styles.half} />
-        <Button title="Continue" onPress={onContinue} style={styles.half} disabled={validCount === 0} />
+        <Button title="Continue" onPress={onContinue} style={styles.half} disabled={validCount === 0} haptic />
       </View>
 
       <TouchableOpacity onPress={onSkipSubjects} style={styles.skipBtn} activeOpacity={0.7}>
@@ -93,7 +94,7 @@ export function SubjectsSlide({ subjects, maxSubjects, onSubjectsChange, onConti
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  title: { fontSize: 26, fontWeight: '700', marginBottom: 8 },
+  title: { fontSize: 26, fontWeight: '700', marginBottom: 8, ...SCREEN_TITLE },
   sub: { fontSize: 15, marginBottom: 16 },
   list: { flex: 1 },
   row: {

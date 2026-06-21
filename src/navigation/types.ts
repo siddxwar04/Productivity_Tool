@@ -6,6 +6,7 @@ export type StudyStackParamList = {
   Planner: undefined;
   Deadlines: undefined;
   AddTask: undefined;
+  ExamSetup: { examId?: string } | undefined;
   Notes: undefined;
   NoteEditor: { noteId?: string };
   Flashcards: undefined;
@@ -41,6 +42,8 @@ export type SocialStackParamList = {
   SocialHub: undefined;
   Groups: undefined;
   Peers: undefined;
+  Leaderboard: undefined;
+  Friends: undefined;
 };
 
 export type ProfileStackParamList = {

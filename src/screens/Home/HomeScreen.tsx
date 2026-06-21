@@ -15,8 +15,11 @@ import { useHabitsStore } from '../../stores/habitsStore';
 import { useDeadlinesStore } from '../../stores/deadlinesStore';
 import { useStreakStore } from '../../stores/streakStore';
 import { useAnalyticsStore } from '../../stores/analyticsStore';
+import { useExamStore } from '../../stores/examStore';
+import { getDaysLeft } from '../../types/exam';
 import { getGreeting, formatDate, formatCountdown, formatStudyTime } from '../../utils/helpers';
 import { MainTabParamList, RootStackParamList } from '../../navigation/types';
+import { SCREEN_TITLE, SECTION_HEADING } from '../../utils/typography';
 
 type HomeNav = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Home'>,
@@ -34,6 +37,16 @@ export function HomeScreen() {
   const upcoming = useMemo(() => getUpcoming(3), [deadlines, getUpcoming]);
   const streak = useStreakStore((s) => s.current);
   const todayStudyMinutes = useAnalyticsStore((s) => s.todayStudyMinutes);
+  const exams = useExamStore((s) => s.exams);
+  const getNextExam = useExamStore((s) => s.getNextExam);
+  const nextExam = useMemo(() => getNextExam(), [exams, getNextExam]);
+
+  const formatExamPreview = (date: string) => {
+    const days = getDaysLeft(date);
+    if (days === 0) return 'Exam day today';
+    if (days === 1) return '1 day away';
+    return `${days} days away`;
+  };
 
   const nextDeadline = upcoming[0];
   const goalMinutes = studyGoalHours * 60;
@@ -99,6 +112,21 @@ export function HomeScreen() {
         </View>
       ))}
 
+      {nextExam ? (
+        <>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Upcoming exams</Text>
+          <View style={[styles.deadlineRow, { borderBottomColor: colors.border }]}>
+            <View style={[styles.priorityDot, { backgroundColor: nextExam.color }]} />
+            <View style={styles.deadlineInfo}>
+              <Text style={[styles.deadlineTitle, { color: colors.text }]}>{nextExam.title}</Text>
+              <Text style={[styles.deadlineTime, { color: colors.textSecondary }]}>
+                {formatExamPreview(nextExam.date)}
+              </Text>
+            </View>
+          </View>
+        </>
+      ) : null}
+
       <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick actions</Text>
       <View style={styles.quickActions}>
         {[
@@ -134,14 +162,14 @@ export function HomeScreen() {
 
 const styles = StyleSheet.create({
   header: { marginBottom: 20 },
-  greeting: { fontSize: 26, fontWeight: '700' },
+  greeting: { fontSize: 26, fontWeight: '700', ...SCREEN_TITLE },
   date: { fontSize: 14, marginTop: 4 },
   focusCard: { marginBottom: 24, borderWidth: 1.5 },
   focusLabel: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   focusTitle: { fontSize: 20, fontWeight: '700', marginTop: 6 },
   focusCountdown: { fontSize: 14, marginTop: 4, marginBottom: 16 },
   focusBtn: { alignSelf: 'flex-start' },
-  sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12, marginTop: 8 },
+  sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12, marginTop: 8, ...SECTION_HEADING },
   habitScroll: { marginBottom: 20, marginHorizontal: -4 },
   streakBanner: {
     flexDirection: 'row',

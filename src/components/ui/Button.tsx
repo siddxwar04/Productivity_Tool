@@ -1,6 +1,8 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, ActivityIndicator } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../theme/ThemeContext';
+import { LABEL } from '../../utils/typography';
 
 interface ButtonProps {
   title: string;
@@ -9,9 +11,10 @@ interface ButtonProps {
   disabled?: boolean;
   loading?: boolean;
   style?: ViewStyle;
+  haptic?: boolean;
 }
 
-export function Button({ title, onPress, variant = 'primary', disabled, loading, style }: ButtonProps) {
+export function Button({ title, onPress, variant = 'primary', disabled, loading, style, haptic }: ButtonProps) {
   const { colors } = useTheme();
 
   const bg =
@@ -24,9 +27,16 @@ export function Button({ title, onPress, variant = 'primary', disabled, loading,
     variant === 'secondary' ? colors.text :
     colors.primary;
 
+  const handlePress = () => {
+    if (haptic && variant === 'primary') {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    onPress();
+  };
+
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={handlePress}
       disabled={disabled || loading}
       style={[
         styles.btn,
@@ -56,5 +66,6 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     fontWeight: '600',
+    ...LABEL,
   },
 });

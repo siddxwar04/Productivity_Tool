@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/Button';
 import { MeditationFigure } from '../../components/ui/MeditationFigure';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { WellnessStackParamList } from '../../navigation/types';
+import { SCREEN_TITLE } from '../../utils/typography';
 
 type Props = NativeStackScreenProps<WellnessStackParamList, 'Breaks'>;
 
@@ -46,7 +47,7 @@ export function BreaksScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 24, fontWeight: '700' },
+  title: { fontSize: 24, fontWeight: '700', ...SCREEN_TITLE },
   timer: { fontSize: 56, fontWeight: '200', marginVertical: 20 },
   tip: { fontSize: 15, textAlign: 'center', paddingHorizontal: 32, marginBottom: 32 },
   btn: { minWidth: 200 },

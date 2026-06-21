@@ -18,6 +18,7 @@ import { exportAllData, clearAllData } from '../../services/exportData';
 import { exportCalendarIcs } from '../../services/calendarService';
 import { signInWithGoogle } from '../../services/supabaseClient';
 import { ProfileStackParamList } from '../../navigation/types';
+import { SECTION_HEADING, LABEL } from '../../utils/typography';
 
 type Props = {
   navigation: NativeStackNavigationProp<ProfileStackParamList, 'Settings'>;
@@ -298,8 +299,8 @@ export function SettingsScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   section: { marginBottom: 16 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
-  sectionTitle: { fontSize: 16, fontWeight: '700' },
-  label: { fontSize: 13, fontWeight: '600', marginBottom: 8 },
+  sectionTitle: { fontSize: 16, fontWeight: '700', ...SECTION_HEADING },
+  label: { fontSize: 13, fontWeight: '600', marginBottom: 8, ...LABEL },
   durationRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
   appsList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },

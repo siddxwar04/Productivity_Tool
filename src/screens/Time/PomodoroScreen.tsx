@@ -16,6 +16,7 @@ import Svg, { Circle } from 'react-native-svg';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
+import * as Haptics from 'expo-haptics';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useNotificationSettingsStore } from '../../stores/notificationSettingsStore';
 import { useFocusLockStore } from '../../stores/focusLockStore';
@@ -200,6 +201,8 @@ export function PomodoroScreen({ navigation }: Props) {
       const newSessions = sessions + 1;
       setSessions(newSessions);
       onPomodoroComplete(pomodoro.workMinutes);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       notifyPhaseEnd('Focus session complete!', 'Great work. Time for a break.');
       if (newSessions % 4 === 0) {
         setPhase('longBreak');
@@ -289,6 +292,7 @@ export function PomodoroScreen({ navigation }: Props) {
   };
 
   const handleStart = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRunning(true);
     if (phase === 'work' && !isFocusLocked) {
       lockSession('Pomodoro focus session', () => {

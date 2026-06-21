@@ -20,6 +20,7 @@ import {
   PlannerPriority,
 } from '../../types/planner';
 import { formatDuration } from '../../services/planner/plannerUtils';
+import * as Haptics from 'expo-haptics';
 
 interface StudyBlockEditorModalProps {
   visible: boolean;
@@ -109,6 +110,7 @@ export function StudyBlockEditorModal({
       return;
     }
 
+    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onClose();
   };
 

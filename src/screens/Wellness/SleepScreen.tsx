@@ -9,6 +9,7 @@ import { ScreenHeader } from '../../components/ui/ScreenHeader';
 import { Card } from '../../components/ui/Card';
 import { useSleepStore } from '../../stores/sleepStore';
 import { WellnessStackParamList } from '../../navigation/types';
+import { SECTION_HEADING } from '../../utils/typography';
 
 type Props = NativeStackScreenProps<WellnessStackParamList, 'Sleep'>;
 
@@ -149,7 +150,7 @@ export function SleepScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   logCard: { marginBottom: 12 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
-  sectionTitle: { fontSize: 15, fontWeight: '700' },
+  sectionTitle: { fontSize: 15, fontWeight: '700', ...SECTION_HEADING },
   hoursDisplay: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, justifyContent: 'center', marginBottom: 16 },
   hoursValue: { fontSize: 52, fontWeight: '800', lineHeight: 56 },
   hoursUnit: { fontSize: 18, fontWeight: '500', marginBottom: 8 },

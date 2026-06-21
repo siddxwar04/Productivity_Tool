@@ -2,6 +2,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { Button } from '../../components/ui/Button';
+import { SCREEN_TITLE } from '../../utils/typography';
 import {
   isNotificationSupported,
   requestNotificationPermissions,
@@ -78,10 +79,10 @@ export function PermissionsSlide({ onFinish, onBack }: Props) {
       <View style={styles.actions}>
         <Button title="Back" onPress={onBack} variant="ghost" style={styles.half} />
         {granted ? (
-          <Button title="Get started" onPress={onFinish} style={styles.half} />
+          <Button title="Get started" onPress={onFinish} style={styles.half} haptic />
         ) : (
           <View style={styles.rightActions}>
-            <Button title="Enable" onPress={handleEnable} loading={loading} style={styles.half} />
+            <Button title="Enable" onPress={handleEnable} loading={loading} style={styles.half} haptic />
             <Button title="Skip for now" onPress={handleSkip} variant="secondary" style={styles.half} />
           </View>
         )}
@@ -93,7 +94,7 @@ export function PermissionsSlide({ onFinish, onBack }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   emoji: { fontSize: 56, textAlign: 'center', marginBottom: 16, marginTop: 20 },
-  title: { fontSize: 26, fontWeight: '700', marginBottom: 8, textAlign: 'center' },
+  title: { fontSize: 26, fontWeight: '700', marginBottom: 8, textAlign: 'center', ...SCREEN_TITLE },
   sub: { fontSize: 15, lineHeight: 22, textAlign: 'center', marginBottom: 24 },
   featureList: { borderWidth: 1, borderRadius: 12, padding: 16, gap: 10 },
   featureItem: { fontSize: 15, lineHeight: 22 },

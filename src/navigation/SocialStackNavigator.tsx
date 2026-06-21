@@ -14,13 +14,24 @@ const PeersScreen = lazyNamedScreen(
   () => require('../screens/Social/PeersScreen'),
   'PeersScreen',
 );
+const LeaderboardScreen = lazyNamedScreen(
+  () => require('../screens/Social/LeaderboardScreen'),
+  'LeaderboardScreen',
+);
+const FriendsScreen = lazyNamedScreen(
+  () => require('../screens/Social/FriendsScreen'),
+  'FriendsScreen',
+);
 
 export function SocialStackNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {/* Leaderboard is the default Social landing screen */}
+      <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
       <Stack.Screen name="SocialHub" component={SocialHubScreen} />
       <Stack.Screen name="Groups" component={GroupsScreen} />
       <Stack.Screen name="Peers" component={PeersScreen} />
+      <Stack.Screen name="Friends" component={FriendsScreen} />
     </Stack.Navigator>
   );
 }

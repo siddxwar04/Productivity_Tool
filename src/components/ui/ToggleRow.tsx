@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Switch, StyleSheet } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { LABEL } from '../../utils/typography';
 
 interface ToggleRowProps {
   label: string;
@@ -41,6 +42,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   textWrap: { flex: 1, marginRight: 12 },
-  label: { fontSize: 16, fontWeight: '500' },
+  label: { fontSize: 16, fontWeight: '500', ...LABEL },
   desc: { fontSize: 13, marginTop: 2 },
 });

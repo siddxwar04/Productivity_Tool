@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme/ThemeContext';
 import { Button } from '../../components/ui/Button';
+import { SCREEN_TITLE, LABEL } from '../../utils/typography';
 
 interface Props {
   displayName: string;
@@ -123,6 +124,7 @@ export function StudyInfoSlide({
             onPress={onContinue}
             style={styles.continueBtn}
             disabled={!displayName.trim()}
+            haptic
           />
         </View>
 
@@ -149,9 +151,9 @@ export function StudyInfoSlide({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  title: { fontSize: 26, fontWeight: '700', marginBottom: 8 },
+  title: { fontSize: 26, fontWeight: '700', marginBottom: 8, ...SCREEN_TITLE },
   sub: { fontSize: 15, marginBottom: 28, lineHeight: 22 },
-  label: { fontSize: 13, fontWeight: '600', marginBottom: 8, marginTop: 12 },
+  label: { fontSize: 13, fontWeight: '600', marginBottom: 8, marginTop: 12, ...LABEL },
   input: {
     borderWidth: 1,
     borderRadius: 12,
@@ -169,7 +171,7 @@ const styles = StyleSheet.create({
     minWidth: 44,
     alignItems: 'center',
   },
-  countChipText: { fontSize: 15, fontWeight: '600' },
+  countChipText: { fontSize: 15, fontWeight: '600', ...LABEL },
   bottomArea: { marginTop: 'auto', paddingTop: 24 },
   actions: { flexDirection: 'row', gap: 12 },
   backBtn: { width: '30%' },

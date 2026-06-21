@@ -9,6 +9,7 @@ import { Button } from '../../components/ui/Button';
 import { useDeadlinesStore } from '../../stores/deadlinesStore';
 import { formatCountdown } from '../../utils/helpers';
 import { StudyStackParamList } from '../../navigation/types';
+import * as Haptics from 'expo-haptics';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'Deadlines'>;
 
@@ -102,6 +103,14 @@ export function DeadlinesScreen({ navigation }: Props) {
     [deadlines, filter],
   );
 
+  const handleToggleComplete = (id: string) => {
+    const deadline = deadlines.find((d) => d.id === id);
+    if (deadline && !deadline.completed) {
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    toggleComplete(id);
+  };
+
   return (
     <ScreenWrapper>
       <ScreenHeader title="Deadlines" onBack={() => navigation.goBack()} />
@@ -155,7 +164,7 @@ export function DeadlinesScreen({ navigation }: Props) {
           <DeadlineRow
             key={d.id}
             deadline={d}
-            onToggle={() => toggleComplete(d.id)}
+            onToggle={() => handleToggleComplete(d.id)}
             onDelete={() => deleteDeadline(d.id)}
           />
         ))

@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StudyHubScreen } from '../screens/Study/StudyHubScreen';
+import { ExamSetupScreen } from '../screens/ExamSetupScreen';
 import { lazyNamedScreen } from './lazyScreen';
 import { StudyStackParamList } from './types';
 
@@ -79,6 +80,7 @@ export function StudyStackNavigator() {
       <Stack.Screen name="Planner" component={PlannerScreen} />
       <Stack.Screen name="Deadlines" component={DeadlinesScreen} />
       <Stack.Screen name="AddTask" component={AddTaskScreen} options={{ presentation: 'modal' }} />
+      <Stack.Screen name="ExamSetup" component={ExamSetupScreen} options={{ presentation: 'modal' }} />
       <Stack.Screen name="Notes" component={NotesListScreen} />
       <Stack.Screen name="NoteEditor" component={NoteEditorScreen} options={{ presentation: 'modal' }} />
       <Stack.Screen name="Flashcards" component={FlashcardsScreen} />

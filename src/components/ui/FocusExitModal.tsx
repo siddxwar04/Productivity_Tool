@@ -1,8 +1,10 @@
 import React from 'react';
 import { Modal, View, Text, StyleSheet } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../theme/ThemeContext';
 import { Button } from './Button';
 import { useFocusLockStore } from '../../stores/focusLockStore';
+import { HEADING } from '../../utils/typography';
 
 export function FocusExitModal() {
   const { colors } = useTheme();
@@ -27,7 +29,15 @@ export function FocusExitModal() {
           </Text>
           <View style={styles.actions}>
             <Button title="Keep Focusing" onPress={keepFocusing} style={styles.btn} />
-            <Button title="End Session" onPress={confirmEndSession} variant="secondary" style={styles.btn} />
+            <Button
+              title="End Session"
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                confirmEndSession();
+              }}
+              variant="secondary"
+              style={styles.btn}
+            />
           </View>
         </View>
       </View>
@@ -51,7 +61,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emoji: { fontSize: 40, marginBottom: 12 },
-  title: { fontSize: 22, fontWeight: '800', marginBottom: 8 },
+  title: { fontSize: 22, fontWeight: '800', marginBottom: 8, ...HEADING },
   message: { fontSize: 15, lineHeight: 22, textAlign: 'center', marginBottom: 20 },
   actions: { width: '100%', gap: 10 },
   btn: { width: '100%' },

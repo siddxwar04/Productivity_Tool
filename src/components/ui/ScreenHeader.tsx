@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme/ThemeContext';
+import { SCREEN_TITLE, BODY } from '../../utils/typography';
 
 interface ScreenHeaderProps {
   title: string;
@@ -36,7 +37,7 @@ const styles = StyleSheet.create({
   wrap: { marginBottom: 20 },
   row: { flexDirection: 'row', alignItems: 'center' },
   back: { width: 40 },
-  title: { flex: 1, fontSize: 22, fontWeight: '700', textAlign: 'center' },
+  title: { flex: 1, fontSize: 22, fontWeight: '700', textAlign: 'center', ...SCREEN_TITLE },
   right: { width: 40, alignItems: 'flex-end' },
-  subtitle: { fontSize: 13, textAlign: 'center', marginTop: 4 },
+  subtitle: { fontSize: 13, textAlign: 'center', marginTop: 4, ...BODY },
 });

@@ -14,4 +14,4 @@ export interface OnlinePeerStatus {
   avatarColor?: string;
 }
 
-export type SocialTab = 'overview' | 'groups' | 'peers';
+export type SocialTab = 'overview' | 'groups' | 'peers' | 'leaderboard';
