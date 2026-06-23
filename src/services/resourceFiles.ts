@@ -1,9 +1,13 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { generateId } from '../utils/helpers';
 
-const RESOURCES_DIR = `${FileSystem.documentDirectory}resources/`;
+// documentDirectory is null on web — guard every FileSystem call
+const RESOURCES_DIR = FileSystem.documentDirectory
+  ? `${FileSystem.documentDirectory}resources/`
+  : null;
 
 async function ensureDir() {
+  if (!RESOURCES_DIR) return;
   const info = await FileSystem.getInfoAsync(RESOURCES_DIR);
   if (!info.exists) {
     await FileSystem.makeDirectoryAsync(RESOURCES_DIR, { intermediates: true });
@@ -16,6 +20,11 @@ function extensionFromUri(uri: string, fallback: string) {
 }
 
 export async function saveResourceFile(sourceUri: string, kind: 'pdf' | 'image'): Promise<string> {
+  // expo-file-system is unsupported on web — use the picker URI directly.
+  // Blob/data URIs work in-session but don't survive a page reload.
+  if (!RESOURCES_DIR) {
+    return sourceUri;
+  }
   await ensureDir();
   const ext = kind === 'pdf' ? 'pdf' : extensionFromUri(sourceUri, 'jpg');
   const dest = `${RESOURCES_DIR}${generateId()}.${ext}`;
@@ -24,7 +33,7 @@ export async function saveResourceFile(sourceUri: string, kind: 'pdf' | 'image')
 }
 
 export async function deleteResourceFile(localUri?: string) {
-  if (!localUri) return;
+  if (!localUri || !RESOURCES_DIR) return;
   try {
     const info = await FileSystem.getInfoAsync(localUri);
     if (info.exists) {

@@ -198,7 +198,8 @@ export function ResourcesScreen({ navigation }: Props) {
       const localUri = await saveResourceFile(asset.uri, 'pdf');
       const name = asset.name || fileNameFromUri(asset.uri);
       addResource({ title: name.replace(/\.pdf$/i, ''), type: 'pdf', localUri });
-    } catch {
+    } catch (err) {
+      console.error('[ResourcesScreen] pickPdf error:', err);
       Alert.alert('Could not add PDF', 'Please try again.');
     } finally {
       setBusy(false);
@@ -222,7 +223,8 @@ export function ResourcesScreen({ navigation }: Props) {
         type: 'image',
         localUri,
       });
-    } catch {
+    } catch (err) {
+      console.error('[ResourcesScreen] pickImage error:', err);
       Alert.alert('Could not add image', 'Please try again.');
     } finally {
       setBusy(false);

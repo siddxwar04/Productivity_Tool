@@ -1,14 +1,14 @@
 import React, { useRef, useState } from 'react';
 import {
-  View, Image, ActivityIndicator, TouchableOpacity, StyleSheet, Share,
+  View, Image, ActivityIndicator, TouchableOpacity, StyleSheet, Share, Platform,
 } from 'react-native';
-import { WebView } from 'react-native-webview';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Sharing from 'expo-sharing';
 import { useTheme } from '../../theme/ThemeContext';
 import { StudyStackParamList } from '../../navigation/types';
+import { PdfViewer, PdfViewerRef } from '../../components/PdfViewer';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'ResourceViewer'>;
 
@@ -16,7 +16,7 @@ export function ResourceViewerScreen({ navigation, route }: Props) {
   const { colors } = useTheme();
   const { title, type, localUri } = route.params;
   const [loading, setLoading] = useState(type === 'pdf');
-  const webRef = useRef<WebView>(null);
+  const webRef = useRef<PdfViewerRef>(null);
 
   const shareFile = async () => {
     if (!localUri) return;
@@ -34,7 +34,7 @@ export function ResourceViewerScreen({ navigation, route }: Props) {
           <Ionicons name="close" size={24} color={colors.text} />
         </TouchableOpacity>
         <View style={styles.barActions}>
-          {type === 'pdf' && (
+          {type === 'pdf' && Platform.OS !== 'web' && (
             <TouchableOpacity onPress={() => webRef.current?.reload()} style={styles.iconBtn}>
               <Ionicons name="reload" size={20} color={colors.text} />
             </TouchableOpacity>
@@ -54,9 +54,9 @@ export function ResourceViewerScreen({ navigation, route }: Props) {
               <ActivityIndicator size="large" color={colors.primary} />
             </View>
           )}
-          <WebView
-            ref={webRef}
-            source={{ uri: localUri }}
+          <PdfViewer
+            webRef={webRef}
+            uri={localUri}
             onLoadStart={() => setLoading(true)}
             onLoadEnd={() => setLoading(false)}
             style={loading ? styles.hidden : styles.web}
